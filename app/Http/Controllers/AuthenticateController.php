@@ -10,6 +10,15 @@ use JWTAuth;
 
 class AuthenticateController extends Controller
 {
+
+    /**
+     * Authenticates a user
+     * @param Request $request the request data
+     * @return \Illuminate\Http\JsonResponse
+     * @Post("/authenticate")
+     * @Request("email=foo&password=bar", contentType="application/x-www-form-urlencoded")
+     * @Response(200, body={"token"=<token>}
+     */
     public function authenticate(Request $request) {
 
         $credentials = $request->only('email', 'password');

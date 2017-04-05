@@ -14,13 +14,26 @@ class AuthenticationTest extends BrowserKitTestCase
     /**
      * @test
      *
-     * Test: GET /api/authenticate.
+     * Test: POST /api/authenticate.
      */
-    public function it_authenticate_a_user()
+    public function given_existingUser_when_authenticate_Then_ReturnsToken()
     {
         $user = factory(App\User::class)->create(['password' => bcrypt('foo')]);
 
         $this->post('/api/authenticate', ['email' => $user->email, 'password' => 'foo'])
             ->seeJsonStructure(['token']);
+    }
+
+    /**
+     * @test
+     *
+     * Test: POST /api/authenticate
+     */
+    public function given_nonExistingUser_when_authenticate_Then_Returns401() {
+        $user = ["email" => "foo@bar.com", "password" => "pass"];
+
+        $this->post('/api/authenticate', ['email' => "foo@bar.com", 'password' => 'foo'])
+            ->seeStatusCode(401)
+            ->seeText("invalid_credentials");
     }
 }
