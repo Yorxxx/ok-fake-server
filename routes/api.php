@@ -26,4 +26,9 @@ $api->version('v1', function ($api) {
     $api->post('authenticate', 'App\Http\Controllers\AuthenticateController@authenticate');
     /*$api->post('logout', 'App\Http\Controllers\AuthenticateController@logout');
     $api->get('token', 'App\Http\Controllers\AuthenticateController@getToken');*/
+
+});
+
+$api->version('v1', ['middleware' => 'api.auth'], function ($api) {
+    $api->get('users/me', 'App\Http\Controllers\AuthenticateController@getAuthenticatedUser');
 });
