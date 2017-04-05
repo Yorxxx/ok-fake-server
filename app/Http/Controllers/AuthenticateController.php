@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Requests;
+use Dingo\Api\Routing\Helpers;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use JWTAuth;
 
 class AuthenticateController extends Controller
 {
+
+    use Helpers;
 
     /**
      * Authenticates a user
@@ -21,8 +24,15 @@ class AuthenticateController extends Controller
      */
     public function authenticate(Request $request) {
 
-        $credentials = $request->only('email', 'password');
+        if (!$request->has('document') || !$request->has('doctype')) {
+            return $this->response->errorBadRequest();
+        }
+        $doctype = $request->get('doctype');
+        if ($doctype !== "N" && $doctype !== "P") {
+            return $this->response->errorBadRequest("Unsupported doctype");
+        }
 
+        $credentials = ['email' => $request->get('document') . '-' . $doctype, 'password' => $request->get('password')];
         try {
             // attempt to verify the credentials and create a token for the user
             if (!$token = JWTAuth::attempt($credentials)) {
