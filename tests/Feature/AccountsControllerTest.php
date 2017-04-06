@@ -31,7 +31,41 @@ class AccountsControllerTest extends BrowserKitTestCase
             'email' => 'foo@bar.com',
             'password' => bcrypt('foo')]);
 
+        $account = \App\Account::create([
+            'number' => '123456789',
+            'linked' => false,
+            'currency' => 'EUR',
+            'amount' => 10000,
+            'user_id' => $user->id
+        ]);
+
         $this->get('/api/accounts', $this->headers($user))
-            ->seeStatusCode(201);
+            ->seeJsonStructure([
+                'data' => [
+                    '*' => [
+                        'number', 'linked', 'currency', 'amount', 'number'
+                    ]
+                ]
+            ]);
+    }
+
+    /**
+     * @test
+     * Test: GET /api/accounts
+     */
+    public function given_authorizedUserWithoutAccounts_When_GetAccounts_Then_ReturnsEmpty() {
+
+        $this->seed('AccountsTableSeeder');
+
+        $user = factory(App\User::class)->create([
+            'document' => '123456789',
+            'doctype' => 'N',
+            'email' => 'foo@bar.com',
+            'password' => bcrypt('foo')]);
+
+        $this->get('/api/accounts', $this->headers($user))
+            ->seeJsonStructure([
+                'data' => []
+            ]);
     }
 }
