@@ -17,7 +17,6 @@ class AuthenticateController extends Controller
     /**
      * Authenticates a user
      * @param Request $request the request data
-     * @return \Illuminate\Http\JsonResponse
      * @Post("/authenticate")
      * @Request("email=foo&password=bar", contentType="application/x-www-form-urlencoded")
      * @Response(200, body={"token"=<token>}
@@ -32,7 +31,7 @@ class AuthenticateController extends Controller
             return $this->response->errorBadRequest("Unsupported doctype");
         }
 
-        $credentials = ['email' => $request->get('document') . '-' . $doctype, 'password' => $request->get('password')];
+        $credentials = ['doctype' email' => $request->get('document'), 'password' => $request->get('password')];
         try {
             // attempt to verify the credentials and create a token for the user
             if (!$token = JWTAuth::attempt($credentials)) {
@@ -47,6 +46,20 @@ class AuthenticateController extends Controller
     }
 
     public function getAuthenticatedUser() {
-        return $this->response->accepted();
+        //return $this->response->accepted();
+
+        try {
+            if (!$user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['user_not_found'], 404);
+            }
+        } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+            return response()->json(['token_expired'], $e->getStatusCode());
+        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+            return response()->json(['token_invalid'], $e->getStatusCode());
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+            return response()->json(['token_absent'], $e->getStatusCode());
+        }
+        // the token is valid and we have found the user via the sub claim
+        return response()->json(compact('user'));
     }
 }

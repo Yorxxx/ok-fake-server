@@ -22,6 +22,8 @@ class RequestResponseLogger
     public function terminate($request, $response)
     {
         Log::info('requests', [
+            'method' => $request->method(),
+            'url' => $request->url(),
             'request' => $request->all(),
             'response' => $response
         ]);

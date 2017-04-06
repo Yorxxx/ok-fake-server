@@ -40,9 +40,17 @@ class UserControllerTest extends BrowserKitTestCase
      */
     public function given_existingUser_when_authenticate_Then_ReturnsToken()
     {
-        $user = factory(App\User::class)->create(['email' => 'foo@bar.com-P', 'password' => bcrypt('foo')]);
+        $user = factory(App\User::class)->create([
+            'first_name' => 'Foo',
+            'phone_preffix' => "+34",
+            'phone' => 123456789,
+            'email' => 'foo@bar.com',
+            'name' => 'Foo Bar',
+            'document' => '123456789',
+            'doctype' => 'N',
+            'password' => bcrypt('foo')]);
 
-        $this->post('/api/authenticate', ['document' => 'foo@bar.com', 'password' => 'foo', 'doctype' => 'P'])
+        $this->post('/api/authenticate', ['document' => $user->document, 'password' => 'foo', 'doctype' => $user->doctype])
             ->seeJsonStructure(['token']);
     }
 
@@ -51,7 +59,7 @@ class UserControllerTest extends BrowserKitTestCase
      * Test: POST /api/authenticate
      */
     public function given_nonExistingUser_when_authenticate_Then_Returns401() {
-        $this->post('/api/authenticate', ['document' => "foo@bar.com", 'password' => 'foo', 'doctype' => 'P'])
+        $this->post('/api/authenticate', ['document' => "foo", 'password' => 'foo', 'doctype' => 'P'])
             ->seeStatusCode(401)
             ->seeText("invalid_credentials");
     }
@@ -61,7 +69,7 @@ class UserControllerTest extends BrowserKitTestCase
      * Test: POST /api/authenticate
      */
     public function given_unsupportedDocType_When_authenticate_Then_Returns400() {
-        $this->post('/api/authenticate', ['document' => "foo@bar.com", 'password' => 'foo', 'doctype' => 'A'])
+        $this->post('/api/authenticate', ['document' => "foo", 'password' => 'foo', 'doctype' => 'A'])
             ->seeStatusCode(400)
             ->seeText("Unsupported doctype");
     }
@@ -80,19 +88,22 @@ class UserControllerTest extends BrowserKitTestCase
      * Test: GET /api/users/me
      */
     public function given_authorizedUser_when_getAuthenticatedUser_Then_ReturnsUser() {
+        /*$user = factory(App\User::class)->create([
+            'first_name' => 'Foo',
+            'phone_preffix' => "+34",
+            'phone' => 123456789,
+            'email' => 'foo2@bar.com',
+            'name' => 'Foo Bar',
+            'document' => '123456789',
+            'doctype' => 'N',
+            'password' => bcrypt('foo')]);*/
         $user = factory(App\User::class)->create(['password' => bcrypt('foo')]);
 
+        $headers = $this->headers($user);
+        self::assertArrayHasKey("Accept", $headers);
+        self::assertArrayHasKey("Authorization", $headers);
         $this->get('/api/users/me', $this->headers($user))
             ->seeStatusCode(202);
-//            ->seeJson([
-//                'data' => [
-//                    'id'        => $user->id,
-//                    'name'      => $user->name,
-//                    'color'     => "Green",
-//                    'weight'    => "150 grams",
-//                    'delicious' => true
-//                ]
-//            ]);
     }
 
     /**
