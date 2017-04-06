@@ -42,16 +42,16 @@ class UserControllerTest extends BrowserKitTestCase
     {
         $user = factory(App\User::class)->create([
             'phone' => "123456789",
-            'email' => 'foo@bar.com',
             'name' => 'Foo Bar',
             'document' => '123456789',
             'doctype' => 'N',
             'password' => bcrypt('foo')]);
 
         $this->post('/api/authenticate', [
-            'document' => $user->document,
+            'document' => '123456789',
             'password' => 'foo',
-            'doctype' => $user->doctype])
+            'first_name' => 'Foo',
+            'doctype' => 'N'])
             ->seeJsonStructure(['token']);
     }
 
@@ -125,6 +125,7 @@ class UserControllerTest extends BrowserKitTestCase
             'document' => '123456789',
             'doctype' => 'N',
             'email' => 'foo@bar.com',
+            'phone' => null,
             'password' => bcrypt('foo')]);
 
         $headers = $this->headers($user);

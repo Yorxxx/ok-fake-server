@@ -63,6 +63,7 @@ class AccountsControllerTest extends BrowserKitTestCase
             'email' => 'foo@bar.com',
             'password' => bcrypt('foo')]);
 
+
         $this->get('/api/accounts', $this->headers($user))
             ->seeJsonStructure([
                 'data' => []

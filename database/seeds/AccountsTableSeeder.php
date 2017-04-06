@@ -15,32 +15,30 @@ class AccountsTableSeeder extends Seeder
     {
         Model::unguard();
         DB::table('accounts')->delete();
+        DB::table('users')->delete();
 
-        $accounts = [
-            ["number" => "123456789",
-                "alias" => "alias1",
-                "linked" => 0,
-                "currency" => "EUR",
-                "amount" => 10000,
-                "user_id" => 1
-                ],
-            ["number" => "789456123",
-                "linked" => 1,
-                "currency" => "EUR",
-                "amount" => 25000,
-                "user_id" => 1
-            ],
-            ["number" => "ES15 2470 4447 8888",
-                "linked" => 1,
-                "currency" => "EUR",
-                "amount" => 2377.15,
-                "user_id" => 1
-            ]
-        ];
-
-        foreach ($accounts as $account) {
-            Account::create($account);
+        for ($i = 0; $i < 10; $i++) {
+            // Add random users
+            factory(App\Account::class)->create();
         }
+
+        // Add our desired users
+        $user = factory(App\User::class)->create([
+                    'name' => 'Jorge García',
+                    'email' => 'jorgegarcia.sopra@gmail.com',
+                    'password' => bcrypt('foo'),
+                    'doctype' => 'N',
+                    'document' => '44878587K',
+                    'phone' => '+34-646547055']
+            );
+
+        factory(App\Account::class)->create([
+            'alias' => 'cuenta principal',
+            'currency' => 'EUR',
+            'amount' => 87549,
+            'user_id' => $user->id
+        ]);
+
         Model::reguard();
     }
 }
