@@ -14,7 +14,8 @@ class AccountsTranformer extends TransformerAbstract
             'linked'    => (bool)$account->linked,//ucfirst($fruit->color),
             'currency'  => $account->currency,
             'amount'    => (double)$account->amount,
-            'user_id'   => (int)$account->user_id
+            'user_id'   => (int)$account->user_id,
+            'alias'     => $account->alias
       /*"number": "123456789",
       "alias": "alias1",
       "linked": "0",

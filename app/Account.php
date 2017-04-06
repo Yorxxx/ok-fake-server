@@ -41,4 +41,12 @@ class Account extends Model
      * @var array
      */
     protected $guarded = ['id'];
+
+    /**
+     * Get the user that owns this account.
+     */
+    /*public function user()
+    {
+        return $this->belongsTo('App\User');
+    }*/
 }

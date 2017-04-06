@@ -28,14 +28,9 @@ class AccountsControllerTest extends BrowserKitTestCase
         $user = factory(App\User::class)->create([
             'document' => '123456789',
             'doctype' => 'N',
-            'email' => 'foo@bar.com',
             'password' => bcrypt('foo')]);
 
-        $account = \App\Account::create([
-            'number' => '123456789',
-            'linked' => false,
-            'currency' => 'EUR',
-            'amount' => 10000,
+        factory(App\Account::class)->create([
             'user_id' => $user->id
         ]);
 
@@ -43,7 +38,7 @@ class AccountsControllerTest extends BrowserKitTestCase
             ->seeJsonStructure([
                 'data' => [
                     '*' => [
-                        'number', 'linked', 'currency', 'amount', 'number'
+                        'number', 'linked', 'currency', 'amount', 'alias'
                     ]
                 ]
             ]);
