@@ -41,16 +41,17 @@ class UserControllerTest extends BrowserKitTestCase
     public function given_existingUser_when_authenticate_Then_ReturnsToken()
     {
         $user = factory(App\User::class)->create([
-            'first_name' => 'Foo',
-            'phone_preffix' => "+34",
-            'phone' => 123456789,
+            'phone' => "123456789",
             'email' => 'foo@bar.com',
             'name' => 'Foo Bar',
             'document' => '123456789',
             'doctype' => 'N',
             'password' => bcrypt('foo')]);
 
-        $this->post('/api/authenticate', ['document' => $user->document, 'password' => 'foo', 'doctype' => $user->doctype])
+        $this->post('/api/authenticate', [
+            'document' => $user->document,
+            'password' => 'foo',
+            'doctype' => $user->doctype])
             ->seeJsonStructure(['token']);
     }
 
@@ -88,23 +89,33 @@ class UserControllerTest extends BrowserKitTestCase
      * Test: GET /api/users/me
      */
     public function given_authorizedUser_when_getAuthenticatedUser_Then_ReturnsUser() {
-        /*$user = factory(App\User::class)->create([
-            'first_name' => 'Foo',
-            'phone_preffix' => "+34",
-            'phone' => 123456789,
-            'email' => 'foo2@bar.com',
-            'name' => 'Foo Bar',
+        $user = factory(App\User::class)->create([
             'document' => '123456789',
             'doctype' => 'N',
-            'password' => bcrypt('foo')]);*/
-        $user = factory(App\User::class)->create(['password' => bcrypt('foo')]);
+            'name' => 'Foo Bar',
+            'email' => 'foo@bar.com',
+            'phone' => '+34-646547055',
+            'password' => bcrypt('foo')]);
 
         $headers = $this->headers($user);
         self::assertArrayHasKey("Accept", $headers);
         self::assertArrayHasKey("Authorization", $headers);
-        $this->get('/api/users/me', $this->headers($user))
-            ->seeStatusCode(202);
+        $this->get('/api/users/me', $headers)
+            ->seeJson([
+                'username'    => $user->document,
+                'documentType' => $user->doctype,
+                'id' => $user->id,
+                'first_name' => 'Foo',
+                'email' => $user->email,
+                'phone' => [
+                    'prefix' => '+34',
+                    'phone' => '646547055'
+                ]
+            ])
+            ->seeStatusCode(200);
     }
+
+
 
     /**
      * Return request headers needed to interact with the API.
@@ -116,11 +127,40 @@ class UserControllerTest extends BrowserKitTestCase
         $headers = ['Accept' => 'application/json'];
 
         if (!is_null($user)) {
-            $token = JWTAuth::fromUser($user);
+            $credentials = ['document' => '123456789', 'password' => 'foo', 'doctype' => 'N'];
+            $token = JWTAuth::attempt($credentials);
+            //$token = JWTAuth::fromUser($user);
             JWTAuth::setToken($token);
             $headers['Authorization'] = 'Bearer '.$token;
         }
 
         return $headers;
+    }
+
+    /**
+     * @test
+     * Test: GET /api/users/me
+     */
+    public function given_authorizedUserWithoutOptionalValues_When_getAuthenticatedUser_Then_ReturnsUserWithoutOptionalKeys()
+    {
+        $user = factory(App\User::class)->create([
+            'document' => '123456789',
+            'doctype' => 'N',
+            'email' => 'foo@bar.com',
+            'password' => bcrypt('foo')]);
+
+        $headers = $this->headers($user);
+        self::assertArrayHasKey("Accept", $headers);
+        self::assertArrayHasKey("Authorization", $headers);
+        $this->get('/api/users/me', $headers)
+            ->seeJson([
+                'username'    => $user->document,
+                'documentType' => $user->doctype,
+                'id' => $user->id,
+                'email' => $user->email,
+            ])
+            ->dontSeeText('prefix')
+            ->dontSeeText('phone')
+            ->seeStatusCode(200);
     }
 }

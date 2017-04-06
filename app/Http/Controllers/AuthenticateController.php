@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Requests;
+use App\Transformers\UsersTranformer;
 use Dingo\Api\Routing\Helpers;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -31,7 +32,7 @@ class AuthenticateController extends Controller
             return $this->response->errorBadRequest("Unsupported doctype");
         }
 
-        $credentials = ['doctype' email' => $request->get('document'), 'password' => $request->get('password')];
+        $credentials = ['document' => $request->get('document'), 'password' => $request->get('password'), 'doctype' => $request->get('doctype')];
         try {
             // attempt to verify the credentials and create a token for the user
             if (!$token = JWTAuth::attempt($credentials)) {
@@ -45,11 +46,20 @@ class AuthenticateController extends Controller
         return response()->json(compact('token'));
     }
 
-    public function getAuthenticatedUser() {
+    /**
+     * Returns the authenticated user
+     * TODO strip null values from json in a more fashioned way
+     * @Get("/users/me")
+     * @Response(200, body={"user"=> $user }
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAuthenticatedUser()
+    {
         //return $this->response->accepted();
 
         try {
-            if (!$user = JWTAuth::parseToken()->authenticate()) {
+            $token = JWTAuth::getToken();
+            if (!$user = JWTAuth::toUser($token)) {
                 return response()->json(['user_not_found'], 404);
             }
         } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
@@ -60,6 +70,45 @@ class AuthenticateController extends Controller
             return response()->json(['token_absent'], $e->getStatusCode());
         }
         // the token is valid and we have found the user via the sub claim
-        return response()->json(compact('user'));
+        $first_name = '';
+        if ($user->name !== null) {
+            //if (!isEmptyOrNullString()) {
+            $first_name = array_values(preg_split('~\s+~', $user->name, -1, PREG_SPLIT_NO_EMPTY))[0];
+        }
+
+        $prefix = $phone = '';
+        if ($user->phone !== null) {
+            $phone_values = explode('-', $user->phone);
+            $prefix = array_values($phone_values)[0];
+            $phone = array_values($phone_values)[1];
+        }
+        $data = [
+            'user' => [
+                'username' => $user->document,
+                'created_at' => $user->created_at->toDateTimeString(),
+                'documentType' => $user->doctype,
+                'email' => $user->email,
+                'id' => $user->id,
+                'first_name' => $first_name,
+                'updated_at' => $user->updated_at->toDateTimeString(),
+                'phone' => [
+                    'prefix' => $prefix,
+                    'phone' => $phone
+                ]
+            ]
+        ];
+        if ($first_name === '') {
+            unset($data['user']['first_name']);
+        }
+        if ($prefix === '') {
+            unset($data['user']['phone']['prefix']);
+        }
+        if ($phone === '') {
+            unset($data['user']['phone']['phone']);
+        }
+        if (empty($data['user']['phone'])) {
+            unset($data['user']['phone']);
+        }
+        return response()->json($data);
     }
 }
