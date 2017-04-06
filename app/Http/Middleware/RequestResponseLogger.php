@@ -21,7 +21,7 @@ class RequestResponseLogger
 
     public function terminate($request, $response)
     {
-        $headers = json_decode(json_encode(getallheaders()), true);
+        /*$headers = json_decode(json_encode(getallheaders()), true);
         if (array_key_exists('Authorization', $headers)) {
             Log::info('requests', [
                 'method' => $request->method(),
@@ -38,7 +38,7 @@ class RequestResponseLogger
                 'request' => $request->all(),
                 'response' => $response
             ]);
-        }
+        }*/
 
     }
 }
