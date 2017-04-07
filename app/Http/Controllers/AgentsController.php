@@ -32,7 +32,7 @@ class AgentsController extends Controller
             return response()->json(['token_absent'], $e->getStatusCode());
         }
         $data = Agent::where('user_id', $user->id)->get();
-        return $this->collection($data, new AgentsTranformer, ['key' => 'data']);
+        return $this->collection($data, new AgentsTranformer, ['key' => 'results']);
         //return $this->response()->accepted();
     }
 }

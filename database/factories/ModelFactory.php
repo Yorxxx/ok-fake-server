@@ -68,7 +68,7 @@ $factory->define(App\Agent::class, function(\Faker\Generator $faker) {
         'account' => $faker->word,
         'owner' => 0,
         'name' => $faker->name,
-        'phone' => '+34-' . $faker->phoneNumber,
+        'phone' => '+34-' . random_int(600000000, 700000000),
         'email' => $faker->unique()->safeEmail,
         'country' => $faker->country,
         'user_id' => function() {

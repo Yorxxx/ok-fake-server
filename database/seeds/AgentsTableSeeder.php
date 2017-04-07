@@ -14,7 +14,7 @@ class AgentsTableSeeder extends Seeder
     public function run()
     {
         Model::unguard();
-        DB::table('settings')->delete();
+        DB::table('agents')->delete();
 
         // Retrieve all users, and for each one, generate a random amount of agents
         $users = User::all();

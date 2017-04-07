@@ -34,7 +34,7 @@ class AgentControllerTest extends BrowserKitTestCase
         $this->get('/api/agents', $this->headers($user))
             ->seeStatusCode(200)
             ->seeJson([
-                "data" => []
+                "results" => []
             ]);
     }
 
@@ -59,7 +59,7 @@ class AgentControllerTest extends BrowserKitTestCase
         $this->get('/api/agents', $this->headers($user))
             ->seeStatusCode(200)
             ->seeJsonStructure([
-                "data" => [
+                "results" => [
                     '*' => [
                         'account', 'name', 'country', 'email'
                     ]
