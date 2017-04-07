@@ -24,6 +24,7 @@ $api->version('v1', function ($api) {
     $api->get('fruit/{id}', 'App\Http\Controllers\FruitsController@show');*/
 
     $api->post('authenticate', 'App\Http\Controllers\AuthenticateController@authenticate');
+    $api->get('currency', 'App\Http\Controllers\CurrenciesController@getCurrency');
     /*$api->post('logout', 'App\Http\Controllers\AuthenticateController@logout');
     $api->get('token', 'App\Http\Controllers\AuthenticateController@getToken');*/
 
