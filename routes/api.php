@@ -32,4 +32,5 @@ $api->version('v1', function ($api) {
 $api->version('v1', ['middleware' => 'api.auth'], function ($api) {
     $api->get('users/me', 'App\Http\Controllers\AuthenticateController@getAuthenticatedUser');
     $api->get('accounts', 'App\Http\Controllers\AccountsController@getAccounts');
+    $api->get('settings', 'App\Http\Controllers\SettingsController@getSettings');
 });
