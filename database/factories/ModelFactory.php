@@ -10,6 +10,7 @@
 | database. Just tell the factory how a default model should look.
 |
 */
+use App\User;
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 $factory->define(App\User::class, function (Faker\Generator $faker) {
@@ -39,6 +40,24 @@ $factory->define(App\Account::class, function (Faker\Generator $faker) {
         'user_id' => function() {
         // Create a new user with every new account
             return factory(App\User::class)->create()->id;
+        }
+    ];
+});
+
+
+$factory->define(App\Setting::class, function (Faker\Generator $faker) {
+
+    $available_languages = ["ES", "EN", "FR", "DE"];
+    $random_language = array_values($available_languages)[random_int(0, count($available_languages)-1)];
+    return [
+        'language' => $random_language,
+        'email_notifications' => random_int(0, 1),
+        'sms_notifications' => random_int(0, 1),
+        'app_notifications' => random_int(0, 1),
+        'user_id' => function() {
+            // Get a random user to work with
+            $user = User::orderBy(DB::raw('RAND()'))->take(1)->get();
+            return $user->id;
         }
     ];
 });
