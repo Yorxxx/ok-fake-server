@@ -1,12 +1,7 @@
 <?php
 
-namespace Tests\Feature;
-
 use Tests\BrowserKitTestCase;
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class AgentControllerTest extends BrowserKitTestCase
 {
@@ -21,4 +16,55 @@ class AgentControllerTest extends BrowserKitTestCase
     {
         $this->get('/api/agents')->seeStatusCode(401);
     }
+
+    /**
+     * @test
+     * Test: GET: /api/agents
+     */
+    public function given_authorizedUserWithoutAgents_When_getAgents_Then_ReturnsEmptyList() {
+
+        $this->seed('UsersTableSeeder');
+        $this->seed('AgentsTableSeeder');
+
+        $user = factory(App\User::class)->create([
+            'document' => '123456789',
+            'doctype' => 'N',
+            'password' => bcrypt('foo')]);
+
+        $this->get('/api/agents', $this->headers($user))
+            ->seeStatusCode(200)
+            ->seeJson([
+                "data" => []
+            ]);
+    }
+
+    /**
+     * @test
+     * Test: GET: /api/agents
+     */
+    public function given_authorizedUserWithAgents_When_getAgents_Then_ReturnsAgentsList() {
+
+        $user = factory(App\User::class)->create([
+            'document' => '123456789',
+            'doctype' => 'N',
+            'password' => bcrypt('foo')]);
+
+        $agent1 = factory(App\Agent::class)->create([
+            'user_id' => $user->id,
+        ]);
+        $agent2 = factory(App\Agent::class)->create([
+            'user_id'   => $user->id
+        ]);
+
+        $this->get('/api/agents', $this->headers($user))
+            ->seeStatusCode(200)
+            ->seeJsonStructure([
+                "data" => [
+                    '*' => [
+                        'account', 'name', 'country', 'email'
+                    ]
+                ]
+            ]);
+    }
+
 }

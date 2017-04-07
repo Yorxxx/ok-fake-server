@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Agent;
+use App\Transformers\AgentsTranformer;
 use Dingo\Api\Routing\Helpers;
 use Illuminate\Http\Request;
 use JWTAuth;
@@ -17,7 +19,7 @@ class AgentsController extends Controller
      */
     public function getAgents() {
 
-        /*try {
+        try {
             $token = JWTAuth::getToken();
             if (!$user = JWTAuth::toUser($token)) {
                 return response()->json(['user_not_found'], 404);
@@ -29,8 +31,8 @@ class AgentsController extends Controller
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
             return response()->json(['token_absent'], $e->getStatusCode());
         }
-        $settings = Setting::where('user_id', $user->id)->get();
-        return $this->collection($settings, new SettingsTranformer, ['key' => 'data']);*/
-        return $this->response()->accepted();
+        $data = Agent::where('user_id', $user->id)->get();
+        return $this->collection($data, new AgentsTranformer, ['key' => 'data']);
+        //return $this->response()->accepted();
     }
 }
