@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Requests;
-use App\Transformers\UsersTranformer;
 use Dingo\Api\Routing\Helpers;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -55,8 +54,6 @@ class AuthenticateController extends Controller
      */
     public function getAuthenticatedUser()
     {
-        //return $this->response->accepted();
-
         try {
             $token = JWTAuth::getToken();
             if (!$user = JWTAuth::toUser($token)) {
