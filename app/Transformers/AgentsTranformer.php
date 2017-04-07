@@ -25,7 +25,7 @@ class AgentsTranformer extends TransformerAbstract
             'email'             => $agent->email,
             'country'           => $agent->country,
             'prefix'            => $prefix,
-            '$phone'            => $phone
+            'phone'            => $phone
         ];
     }
 }
