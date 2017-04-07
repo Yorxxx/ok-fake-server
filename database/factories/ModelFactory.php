@@ -61,3 +61,20 @@ $factory->define(App\Setting::class, function (Faker\Generator $faker) {
         }
     ];
 });
+
+$factory->define(App\Agent::class, function(\Faker\Generator $faker) {
+
+    return [
+        'account' => $faker->word,
+        'owner' => 0,
+        'name' => $faker->name,
+        'phone' => '+34-' . $faker->phoneNumber,
+        'email' => $faker->unique()->safeEmail,
+        'country' => $faker->country,
+        'user_id' => function() {
+            // Get a random user to work with
+            $user = User::orderBy(DB::raw('RAND()'))->take(1)->get();
+            return $user->id;
+        }
+    ];
+});
