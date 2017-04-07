@@ -34,6 +34,8 @@ $factory->define(App\Account::class, function (Faker\Generator $faker) {
         'linked' => random_int(0, 1),
         'currency' => 'EUR',
         'amount' => $faker->randomFloat(2, 100, 1000000),
+        'enterprise' => $faker->company,
+        'contract_number' => ''  . $faker-> randomDigitNotNull,
         'user_id' => function() {
         // Create a new user with every new account
             return factory(App\User::class)->create()->id;

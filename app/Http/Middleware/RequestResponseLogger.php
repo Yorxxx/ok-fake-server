@@ -21,15 +21,17 @@ class RequestResponseLogger
 
     public function terminate($request, $response)
     {
-        /*$headers = json_decode(json_encode(getallheaders()), true);
-        if (array_key_exists('Authorization', $headers)) {
-            Log::info('requests', [
-                'method' => $request->method(),
-                'url' => $request->url(),
-                'request' => $request->all(),
-                'Authorization' => $headers['Authorization'],
-                'response' => $response
-            ]);
+        if (function_exists('getallheaders')) {
+            $headers = json_decode(json_encode(getallheaders()), true);
+            if (array_key_exists('Authorization', $headers)) {
+                Log::info('requests', [
+                    'method' => $request->method(),
+                    'url' => $request->url(),
+                    'request' => $request->all(),
+                    'Authorization' => $headers['Authorization'],
+                    'response' => $response
+                ]);
+            }
         }
         else {
             Log::info('requests', [
@@ -38,7 +40,7 @@ class RequestResponseLogger
                 'request' => $request->all(),
                 'response' => $response
             ]);
-        }*/
+        }
 
     }
 }
