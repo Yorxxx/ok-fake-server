@@ -19,7 +19,7 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
     return [
         'name' => $faker->name,
         'email' => $faker->unique()->safeEmail,
-        'password' => $password ?: $password = bcrypt('secret'),
+        'password' => $password ?: $password = bcrypt('1111'),
         'remember_token' => str_random(10),
         'document' => random_int(30000000, 60000000) . ucfirst($faker->randomLetter),
         'doctype' => 'N',

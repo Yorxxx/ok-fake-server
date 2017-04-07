@@ -18,7 +18,7 @@ class AccountsTableSeeder extends Seeder
         DB::table('users')->delete();
 
         for ($i = 0; $i < 10; $i++) {
-            // Add random users
+            // Add random accounts
             factory(App\Account::class)->create();
         }
 
@@ -26,7 +26,7 @@ class AccountsTableSeeder extends Seeder
         $user = factory(App\User::class)->create([
                     'name' => 'Jorge García',
                     'email' => 'jorgegarcia.sopra@gmail.com',
-                    'password' => bcrypt('foo'),
+                    'password' => bcrypt('5780'),
                     'doctype' => 'N',
                     'document' => '44878587K',
                     'phone' => '+34-646547055']
@@ -38,6 +38,13 @@ class AccountsTableSeeder extends Seeder
             'amount' => 87549,
             'user_id' => $user->id
         ]);
+        factory(App\Account::class)->create([
+            'alias' => 'cuenta secundaria',
+            'currency' => 'GBP',
+            'amount' => 12500,
+            'user_id' => $user->id
+        ]);
+
 
         Model::reguard();
     }
