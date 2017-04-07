@@ -47,7 +47,7 @@ $factory->define(App\Account::class, function (Faker\Generator $faker) {
 
 $factory->define(App\Setting::class, function (Faker\Generator $faker) {
 
-    $available_languages = ["ES", "EN", "FR", "DE"];
+    $available_languages = ["es_ES", "en_GB", "fr_FR", "de_DE"];
     $random_language = array_values($available_languages)[random_int(0, count($available_languages)-1)];
     return [
         'language' => $random_language,
