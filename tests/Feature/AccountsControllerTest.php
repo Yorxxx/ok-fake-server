@@ -36,10 +36,8 @@ class AccountsControllerTest extends BrowserKitTestCase
 
         $this->get('/api/accounts', $this->headers($user))
             ->seeJsonStructure([
-                'data' => [
-                    '*' => [
-                        'number', 'linked', 'currency', 'amount', 'alias'
-                    ]
+                '*' => [
+                    'number', 'linked', 'currency', 'amount', 'alias'
                 ]
             ]);
     }
@@ -60,8 +58,6 @@ class AccountsControllerTest extends BrowserKitTestCase
 
 
         $this->get('/api/accounts', $this->headers($user))
-            ->seeJsonStructure([
-                'data' => []
-            ]);
+            ->seeJsonStructure([]);
     }
 }

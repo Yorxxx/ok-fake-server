@@ -33,6 +33,6 @@ class SettingsController extends Controller
             return response()->json(['token_absent'], $e->getStatusCode());
         }
         $settings = Setting::where('user_id', $user->id)->get();
-        return $this->collection($settings, new SettingsTranformer);
+        return $this->collection($settings, new SettingsTranformer, ['key' => 'data']);
     }
 }

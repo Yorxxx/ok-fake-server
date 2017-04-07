@@ -32,6 +32,7 @@ class AccountsController extends Controller
             return response()->json(['token_absent'], $e->getStatusCode());
         }
         $accounts = Account::where('user_id', $user->id)->get();
+        //return $this->response->array(['data' => $accounts], 200);
         return $this->collection($accounts, new AccountsTranformer);
     }
 }

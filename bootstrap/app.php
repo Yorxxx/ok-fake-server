@@ -40,6 +40,15 @@ $app->singleton(
     Illuminate\Contracts\Debug\ExceptionHandler::class,
     App\Exceptions\Handler::class
 );
+//
+//$app['Dingo\Api\Transformer\Factory']->setAdapter(function ($app) {
+//   // $fractal = new League\Fractal\Manager;
+//    //$fractal->setSerializer(new \App\NoDataArraySerializer);
+//    //return new Dingo\Api\Transformer\Adapter\Fractal($fractal);
+//});
+//$this->app['Dingo\Api\Transformer\Factory']->setAdapter(function ($app) {
+//    return new Dingo\Api\Transformer\Adapter\Fractal(new League\Fractal\Manager, 'include', ',');
+//});
 
 /*
 |--------------------------------------------------------------------------
