@@ -65,10 +65,10 @@ $factory->define(App\Setting::class, function (Faker\Generator $faker) {
 $factory->define(App\Agent::class, function(\Faker\Generator $faker) {
 
     return [
-        'account' => $faker->word,
+        'account' => $faker->iban('ES') . $faker->bankAccountNumber,
         'owner' => 0,
         'name' => $faker->name,
-        'phone' => '+34-' . random_int(600000000, 700000000),
+        'phone' => '34-' . random_int(600000000, 700000000),
         'email' => $faker->unique()->safeEmail,
         'country' => $faker->country,
         'user_id' => function() {
