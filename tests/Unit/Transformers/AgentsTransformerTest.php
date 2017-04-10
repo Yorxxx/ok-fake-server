@@ -32,13 +32,15 @@ class AgentsTransformerTest extends BrowserKitTestCase
         // Assert
         self::assertNotNull($result);
         self::assertArrayHasKey('account', $result);
+        self::assertArrayHasKey('id', $result);
         self::assertArrayHasKey('owner', $result);
         self::assertArrayHasKey('name', $result);
         self::assertArrayHasKey('email', $result);
         self::assertArrayHasKey('country', $result);
         self::assertArrayHasKey('prefix', $result);
         self::assertArrayHasKey('phone', $result);
-        self::assertEquals($agent->id, $result['account']);
+        self::assertEquals($agent->id, $result['id']);
+        self::assertEquals('foo', $result['account']);
         self::assertEquals(false, $result['owner']);
         self::assertEquals("foo bar", $result['name']);
         self::assertEquals("foo@bar.com", $result['email']);

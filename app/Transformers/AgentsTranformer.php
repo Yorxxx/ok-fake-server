@@ -19,7 +19,8 @@ class AgentsTranformer extends TransformerAbstract
         }
 
         return [
-            'account'           => $agent->id,
+            'id'                => $agent->id,
+            'account'           => $agent->account,
             'owner'             => (bool)$agent->owner,
             'name'              => $agent->name,
             'email'             => $agent->email,
