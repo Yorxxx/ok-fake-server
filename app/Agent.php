@@ -58,6 +58,6 @@ class Agent extends Model
         $prefix = null;
         $phone_values = explode('-', $this->phone);
         $prefix = array_values($phone_values)[0];
-        return $prefix;
+        return str_replace_first("+", "", $prefix);
     }
 }

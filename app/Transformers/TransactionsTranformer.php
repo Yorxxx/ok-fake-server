@@ -2,6 +2,7 @@
 namespace App\Transformers;
 
 use App\Transaction;
+use Faker\Provider\DateTime;
 use League\Fractal\TransformerAbstract;
 
 class TransactionsTranformer extends TransformerAbstract
@@ -23,9 +24,9 @@ class TransactionsTranformer extends TransformerAbstract
             'agent_source'          => [
                 'account'           =>  $transaction->source->account
             ],
-            'date_start'            => $transaction->date_start,
-            'date_end'              => $transaction->date_end,
-            'date_creation'         => $transaction->date_creation,
+            'date_start'            => $transaction->date_start->getTimestamp()*1000,
+            'date_end'              => $transaction->date_end->getTimestamp()*1000,
+            'date_creation'         => $transaction->date_creation->getTimestamp()*1000,
             'amount_destination'    => (double)$transaction->amount_destination,
             'amount_estimated'      => (double)$transaction->amount_source,
             'state'                 => (int)$transaction->state,

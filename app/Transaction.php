@@ -21,6 +21,19 @@ class Transaction extends Model
     protected $guarded = ['id'];
 
     /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'date_start',
+        'date_end',
+        'date_creation'
+    ];
+
+    /**
      * Returns the user associated
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
