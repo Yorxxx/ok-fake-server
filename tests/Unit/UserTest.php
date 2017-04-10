@@ -12,47 +12,50 @@ class AgentTest extends BrowserKitTestCase
 
     /**
      * @test
-     * Given an agent, should retrieve related user
+     * Given a user, should retrieve its agents
      */
-    public function given_agent_when_user_Then_ReturnsUser() {
-        $user = factory(App\User::class)->create([
-            'document' => '123456789',
-            'doctype' => 'N',
-            'password' => bcrypt('foo')]);
+    public function given_user_when_agents_Then_ReturnsUserAgents() {
+        $user = factory(App\User::class)->create(['name'  => 'John Doe']);
 
         $agent1 = factory(App\Agent::class)->create([
             'user_id'   => $user->id
         ]);
+        $agent2 = factory(App\Agent::class)->create([
+            'user_id'   => $user->id
+        ]);
 
         // Act
-        $result = $agent1->user;
+        $result = $user->agents;
 
         // Assert
         self::assertNotNull($result);
-        self::assertEquals($user->id,$result->id);
+        self::assertCount(2, $result);
+        self::assertEquals($agent1->id, $result[0]->id);
+        self::assertEquals($agent2->id, $result[1]->id);
     }
 
     /**
      * @test
-     * Given an agent with received transactions, should be able to retrieve those transactions that have been emitted to him.
+     * Given a user with transactions, should be able to retrieve them (received and emitted
      */
-    public function given_agentWithTransactions_When_receivedTransactions_Then_ReturnsTransaction() {
+    public function given_userWithTransaction_When_transactions_Then_ReturnsTransaction() {
 
         $user = factory(App\User::class)->create([]);
 
-        $agent = factory(App\Agent::class)->create([
-            'user_id'   => $user->id
-        ]);
         $transaction = factory(App\Transaction::class)->create([
-            'agent_destination' => $agent->id
+            'user_id' => $user->id
+        ]);
+        $transaction2 = factory(App\Transaction::class)->create([
+            'user_id' => $user->id
         ]);
 
         // Act
-        $result = $agent->receivedTransactions;
+        $result = $user->transactions;
 
         // Assert
         self::assertNotNull($result);
-        self::assertCount(1, $result);
+        self::assertCount(2, $result);
         self::assertEquals($transaction->id, $result[0]->id);
+        self::assertEquals($transaction2->id, $result[1]->id);
     }
 }

@@ -41,6 +41,6 @@ class Transaction extends Model
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function source() {
-        return $this->hasOne('App\Agent');
+        return $this->hasOne('App\Agent', 'id', 'agent_source');
     }
 }
