@@ -20,11 +20,13 @@ class TransactionsTableSeeder extends Seeder
         $users = User::all();
 
         foreach ($users as $user) {
-            $max = random_int(0, 25);
-            for ($i = 0; $i< $max; $i++) {
+            // For every agent of the user, we add a transaction
+            $agents = $user->agents;
+            foreach ($agents as $agent) {
                 factory(App\Transaction::class)->create([
-                    'user_id' => $user->id,
-                    'agent_source' => $user->id
+                    'user_id'           =>  $user->id,
+                    'agent_source'      =>  $user->id,
+                    'agent_destination' =>  $agent->id
                 ]);
             }
         }

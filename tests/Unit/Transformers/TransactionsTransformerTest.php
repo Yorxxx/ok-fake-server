@@ -3,7 +3,7 @@
 use Tests\BrowserKitTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-class AgentTest extends BrowserKitTestCase
+class TransactionsTransformerTest extends BrowserKitTestCase
 {
     use DatabaseMigrations;
 
@@ -24,7 +24,8 @@ class AgentTest extends BrowserKitTestCase
         ]);
         $dest_agent = factory(App\Agent::class)->create([
             'user_id'   => $dest_user->id,
-            'name'      => "Foo Bar"
+            'name'      => "Foo Bar",
+            'phone'     => "+44-123456789"
         ]);
 
         $transaction = factory(App\Transaction::class)->create([
@@ -69,6 +70,8 @@ class AgentTest extends BrowserKitTestCase
         self::assertNotNull($result_agent);
         self::assertArrayHasKey('id', $result_agent);
         self::assertArrayHasKey('name', $result_agent);
+        self::assertArrayHasKey('phone', $result_agent);
+        self::assertArrayHasKey('prefix', $result_agent);
         self::assertEquals("Foo Bar", $result_agent['name']);
     }
 }

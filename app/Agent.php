@@ -11,7 +11,7 @@ class Agent extends Model
      *
      * @var array
      */
-    protected $fillable = ['account', 'owner', 'name', 'phone', 'prefix', 'email', 'country', 'user_id'];
+    protected $fillable = ['account', 'owner', 'name', 'phone', 'email', 'country', 'user_id'];
 
     /**
      * The attributes that are not mass assignable
@@ -33,5 +33,31 @@ class Agent extends Model
      */
     public function receivedTransactions() {
         return $this->hasMany('App\Transaction', 'agent_destination');
+    }
+
+    /**
+     * Returns the localphone (ie: phone without prefix)
+     */
+    public function localPhone() {
+        if ($this->phone == null) {
+            return null;
+        }
+        $phone = '';
+        $phone_values = explode('-', $this->phone);
+        $phone = array_values($phone_values)[1];
+        return $phone;
+    }
+
+    /**
+     * Returns the prefix of the related phone (or null if no phone)
+     */
+    public function prefix() {
+        if ($this->phone == null) {
+            return null;
+        }
+        $prefix = null;
+        $phone_values = explode('-', $this->phone);
+        $prefix = array_values($phone_values)[0];
+        return $prefix;
     }
 }

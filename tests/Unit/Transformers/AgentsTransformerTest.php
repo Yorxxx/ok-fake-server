@@ -3,7 +3,7 @@
 use Tests\BrowserKitTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-class AgentTest extends BrowserKitTestCase
+class AgentsTransformerTest extends BrowserKitTestCase
 {
     use DatabaseMigrations;
 

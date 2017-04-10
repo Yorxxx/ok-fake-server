@@ -15,8 +15,10 @@ class TransactionsTranformer extends TransformerAbstract
         return [
             'id'                    => $transaction->id,
             'agent_destination'     => [
-                'id'    => $transaction->destination->id,
-                'name'  => $transaction->destination->name
+                'id'        => $transaction->destination->id,
+                'name'      => $transaction->destination->name,
+                'phone'     => $transaction->destination->localPhone(),
+                'prefix'    => $transaction->destination->prefix()
             ],
             'date_start'            => $transaction->date_start,
             'date_end'              => $transaction->date_end,

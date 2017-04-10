@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
-class AgentTest extends BrowserKitTestCase
+class AccountTransformerTest extends BrowserKitTestCase
 {
     use DatabaseMigrations;
 

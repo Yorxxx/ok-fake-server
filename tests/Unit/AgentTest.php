@@ -55,4 +55,86 @@ class AgentTest extends BrowserKitTestCase
         self::assertCount(1, $result);
         self::assertEquals($transaction->id, $result[0]->id);
     }
+
+    /**
+     * @test
+     * Given an agent with phone and prefix, should be able to return phone value only
+     */
+    public function given_agentWithPhone_When_localPhone_Then_ReturnsPhoneWithoutPreffix() {
+
+        $user = factory(App\User::class)->create([]);
+
+        $agent = factory(App\Agent::class)->create([
+            'user_id'   => $user->id,
+            'phone'     => '+34-123456789'
+        ]);
+
+        // Act
+        $result = $agent->localPhone();
+
+        // Assert
+        self::assertNotNull($result);
+        self::assertEquals("123456789", $result);
+    }
+
+    /**
+     * @test
+     * Given an agent with phone and prefix, should be able to return phone value only
+     */
+    public function given_agentWithPhone_When_prefix_Then_ReturnsPhonePrefix() {
+
+        $user = factory(App\User::class)->create([]);
+
+        $agent = factory(App\Agent::class)->create([
+            'user_id'   => $user->id,
+            'phone'     => '+34-123456789'
+        ]);
+
+        // Act
+        $result = $agent->prefix();
+
+        // Assert
+        self::assertNotNull($result);
+        self::assertEquals("+34", $result);
+    }
+
+    /**
+     * @test
+     * Given an agent without phone, should return null when is requested about the phone prefix
+     */
+    public function given_agentWithoutPhone_When_prefix_Then_ReturnsNull() {
+
+        $user = factory(App\User::class)->create([]);
+
+        $agent = factory(App\Agent::class)->create([
+            'user_id'   => $user->id,
+            'phone'     => null
+        ]);
+
+        // Act
+        $result = $agent->prefix();
+
+        // Assert
+        self::assertNull($result);
+    }
+
+    /**
+     * @test
+     * Given an agent without phone, should return null when is requested about the local phone
+     */
+    public function given_agentWithoutPhone_When_localPhone_Then_ReturnsNull() {
+
+        $user = factory(App\User::class)->create([]);
+
+        $agent = factory(App\Agent::class)->create([
+            'user_id'   => $user->id,
+            'phone'     => null
+        ]);
+
+        // Act
+        $result = $agent->localPhone();
+
+        // Assert
+        self::assertNull($result);
+    }
 }
