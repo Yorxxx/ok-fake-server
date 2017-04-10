@@ -19,24 +19,29 @@ class TransactionsTransformerTest extends BrowserKitTestCase
         $source_user = factory(App\User::class)->create([]);
         $dest_user = factory(App\User::class)->create([]);
 
-        $source_agent = factory(App\Agent::class)->create([
-            'user_id'   => $source_user->id
-        ]);
+        $time = new DateTime('now');
+        $expectedTime = $time->getTimestamp()*1000; // Expected output in milliseconds
+
         $dest_agent = factory(App\Agent::class)->create([
             'user_id'   => $dest_user->id,
             'name'      => "Foo Bar",
-            'phone'     => "+44-123456789"
+            'phone'     => "+44-123456789",
+            'account'   => "5555",
+            'country'   => "ES"
         ]);
 
         $transaction = factory(App\Transaction::class)->create([
-            'agent_source'          => $source_agent->id,
+            'agent_source'          => $dest_agent->account,
             'agent_destination'     => $dest_agent->id,
             'user_id'               => $source_user->id,
             'amount_destination'    => 10000,
             'amount_source'         => 10001,
             'state'                 => 5,
             'concept'               => "concepto",
-            'currency_destination'  => "EUR"
+            'currency_destination'  => "EUR",
+            'date_start'            => $time,
+            'date_end'              => $time,
+            'date_creation'         => $time
         ]);
 
         $result = $transformer->transform($transaction);
@@ -56,6 +61,8 @@ class TransactionsTransformerTest extends BrowserKitTestCase
         self::assertArrayHasKey('amount_source', $result);
         self::assertArrayHasKey('currency_source', $result);
         self::assertArrayHasKey('agent_destination', $result);
+        self::assertArrayHasKey('agent_source', $result);
+
         self::assertEquals($transaction->id, $result['id']);
         self::assertNotNull($result['date_start']);
         self::assertNotNull($result['date_end']);
@@ -65,13 +72,27 @@ class TransactionsTransformerTest extends BrowserKitTestCase
         self::assertEquals(5, $result['state']);
         self::assertEquals("concepto", $result['concept']);
         self::assertEquals("EUR", $result['currency_destination']);
+        self::assertEquals($expectedTime, $result['date_start']);
+        self::assertEquals($expectedTime, $result['date_end']);
+        self::assertEquals($expectedTime, $result['date_creation']);
 
-        $result_agent = $result['agent_destination'];
-        self::assertNotNull($result_agent);
-        self::assertArrayHasKey('id', $result_agent);
-        self::assertArrayHasKey('name', $result_agent);
-        self::assertArrayHasKey('phone', $result_agent);
-        self::assertArrayHasKey('prefix', $result_agent);
-        self::assertEquals("Foo Bar", $result_agent['name']);
+        $result_dest_agent = $result['agent_destination'];
+        self::assertNotNull($result_dest_agent);
+        self::assertArrayHasKey('id', $result_dest_agent);
+        self::assertArrayHasKey('name', $result_dest_agent);
+        self::assertArrayHasKey('phone', $result_dest_agent);
+        self::assertArrayHasKey('prefix', $result_dest_agent);
+        self::assertArrayHasKey('account', $result_dest_agent);
+        self::assertArrayHasKey('country', $result_dest_agent);
+        self::assertArrayHasKey('sort_code', $result_dest_agent);
+        self::assertEquals("Foo Bar", $result_dest_agent['name']);
+        self::assertEquals("5555", $result_dest_agent['account']);
+        self::assertEquals("ES", $result_dest_agent['country']);
+        self::assertSame("44", $result_dest_agent['prefix']);
+
+        $result_source_agent = $result['agent_source'];
+        self::assertNotNull($result_source_agent);
+        self::assertArrayHasKey('account', $result_source_agent);
+        self::assertEquals("5555", $result_source_agent['account']);
     }
 }

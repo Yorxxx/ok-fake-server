@@ -25,7 +25,7 @@ class TransactionsTableSeeder extends Seeder
             foreach ($agents as $agent) {
                 factory(App\Transaction::class)->create([
                     'user_id'           =>  $user->id,
-                    'agent_source'      =>  $user->id,
+                    'agent_source'      =>  $agent->account,
                     'agent_destination' =>  $agent->id
                 ]);
             }

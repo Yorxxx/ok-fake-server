@@ -20,6 +20,7 @@ class AuthenticateController extends Controller
      * @Post("/authenticate")
      * @Request("email=foo&password=bar", contentType="application/x-www-form-urlencoded")
      * @Response(200, body={"token"=<token>}
+     * @return \Illuminate\Http\JsonResponse
      */
     public function authenticate(Request $request) {
 

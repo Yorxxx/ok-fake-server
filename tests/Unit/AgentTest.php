@@ -29,7 +29,7 @@ class AgentTest extends BrowserKitTestCase
 
         // Assert
         self::assertNotNull($result);
-        self::assertEquals($user->id,$result->id);
+        self::assertEquals($user->id, $result->id);
     }
 
     /**
@@ -74,7 +74,7 @@ class AgentTest extends BrowserKitTestCase
 
         // Assert
         self::assertNotNull($result);
-        self::assertEquals("123456789", $result);
+        self::assertSame("123456789", $result);
     }
 
     /**
@@ -95,7 +95,8 @@ class AgentTest extends BrowserKitTestCase
 
         // Assert
         self::assertNotNull($result);
-        self::assertEquals("+34", $result);
+        self::assertSame("34", $result);
+        self::assertStringStartsNotWith("+", $result);
     }
 
     /**

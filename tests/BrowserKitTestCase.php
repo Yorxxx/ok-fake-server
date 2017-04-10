@@ -39,13 +39,16 @@ abstract class BrowserKitTestCase extends TestCase
      *
      * @return Array array of headers.
      */
-    protected function headers($user = null)
+    protected function headers($user = null, $pass = "foo")
     {
         $headers = ['Accept' => 'application/json'];
 
         if (!is_null($user)) {
-            $credentials = ['document' => '123456789', 'password' => 'foo', 'doctype' => 'N'];
-            $token = JWTAuth::attempt($credentials);
+            $credentials = [
+                'document' => $user->document,
+                'password' => $pass,
+                'doctype' => $user->doctype];
+            $token = JWTAuth::fromUser($user);
             //$token = JWTAuth::fromUser($user);
             JWTAuth::setToken($token);
             $headers['Authorization'] = 'Bearer '.$token;

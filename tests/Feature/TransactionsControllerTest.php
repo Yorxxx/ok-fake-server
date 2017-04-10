@@ -1,10 +1,7 @@
 <?php
 
 use Tests\BrowserKitTestCase;
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class TransactionsControllerTest extends BrowserKitTestCase
 {
@@ -13,6 +10,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
     /**
      * @test
      * Test: GET: /api/transactions
+     * Requesting a detailed transaction without authorization, should return 401
      */
     public function given_noAuthorization_When_getTransactions_Then_Returns401()
     {
@@ -22,13 +20,11 @@ class TransactionsControllerTest extends BrowserKitTestCase
     /**
      * @test
      * Test: GET: /api/transactions
+     * Requesting transactions for current user without having performed any of them, should return an empty list
      */
     public function given_authorizedUserWithoutTransactions_When_getTransactions_Then_ReturnsEmptyList() {
 
-        $user = factory(App\User::class)->create([
-            'document' => '123456789',
-            'doctype' => 'N',
-            'password' => bcrypt('foo')]);
+        $user = factory(App\User::class)->create();
 
         $this->get('/api/transactions', $this->headers($user))
             ->seeStatusCode(200)
@@ -40,29 +36,16 @@ class TransactionsControllerTest extends BrowserKitTestCase
     /**
      * @test
      * Test: GET: /api/transactions
+     * Requesting user transactions should return a list containing all the transactions associated to the user
      */
     public function given_authorizedUserWithTransactions_When_getTransactions_Then_ReturnsUserTransactions() {
 
-        $user = factory(App\User::class)->create([
-            'document' => '123456789',
-            'doctype' => 'N',
-            'password' => bcrypt('foo')]);
+        $user = factory(App\User::class)->create();
+        $dest_agent = factory(App\Agent::class)->create();
 
-        $source_agent = factory(App\Agent::class)->create([
-            'user_id' => $user->id]);
-        $source_agent->user()->associate($user);
-
-        $dest_user = factory(App\User::class)->create([
-            'name'  => 'John Doe',
-            'document' => '44444444',
-            'doctype' => 'N',
-            'password' => bcrypt('foo')]);
-        $dest_agent = factory(App\Agent::class)->create(['user_id' => $dest_user->id]);
-        $dest_agent->user()->associate($dest_user);
-
-        $transaction = factory(App\Transaction::class)->create([
+        factory(App\Transaction::class)->create([
             'user_id' => $user->id,
-            'agent_source' => $source_agent->id,
+            'agent_source' => $dest_agent->account,
             'agent_destination' => $dest_agent->id
         ]);
 
@@ -75,6 +58,105 @@ class TransactionsControllerTest extends BrowserKitTestCase
                         'state', 'concept', 'currency_destination', 'amount_source', 'currency_source'
                     ]
                 ]
+            ]);
+    }
+
+    /**
+     * @test
+     * Test: GET: /api/transactions/{id}
+     * Requesting a transaction by a non-existing id, should return error
+     */
+    public function given_notFoundTransactionId_When_show_Then_ReturnsNotFoundError() {
+
+        $user = factory(App\User::class)->create();
+
+        // Arrange
+        $source_agent = factory(App\Agent::class)->create();
+        $dest_agent = factory(App\Agent::class)->create();
+
+        factory(App\Transaction::class)->create([
+            'id'                => 10,
+            'user_id'           => $user->id,
+            'agent_source'      => $source_agent->id,
+            'agent_destination' => $dest_agent->id
+        ]);
+
+        // Act
+        $result = $this->get('/api/transactions/100', $this->headers($user));
+
+        // Assert
+        $result
+            ->seeStatusCode(404)
+            ->seeText("Transaction not found");
+    }
+
+    /**
+     * @test
+     * Test: GET: /api/transactions/{id}
+     * Requesting a transaction by id without Authorization should be forbidden
+     */
+    public function given_noAuthorization_When_show_Then_Returns401() {
+
+        // Act
+        $result = $this->get('/api/transactions/100');
+
+        // Assert
+        $result->seeStatusCode(401);
+    }
+
+    /**
+     * @test
+     * TEST: GET /api/transactions/{id}
+     * Requesting a transaction by id with Authorization but not performed by user, should be forbidden
+     */
+    public function given_notAuthorizedTransaction_When_Show_Then_Returns403() {
+
+        // Arrange
+        $currentUser = factory(App\User::class)->create();
+
+        $user = factory(App\User::class)->create();
+        $source_agent = factory(App\Agent::class)->create();
+        $dest_agent = factory(App\Agent::class)->create();
+
+        factory(App\Transaction::class)->create([
+            'id'                => 10,
+            'user_id'           => $user->id,
+            'agent_source'      => $source_agent->id,
+            'agent_destination' => $dest_agent->id
+        ]);
+
+        // Act
+        $result = $this->get('/api/transactions/10', $this->headers($currentUser, "abc"));
+
+        // Assert
+        $result->seeStatusCode(403);
+    }
+
+    /**
+     * @test
+     * TEST: GET /api/transactions/{id}
+     * Requesting an authorized transaction by id performed by current user, should return the transaction details
+     */
+    public function given_AuthorizedExistingTransaction_When_Show_Then_ReturnsTransaction() {
+
+        // Arrange
+        $user = factory(App\User::class)->create();
+
+        $dest_agent = factory(App\Agent::class)->create();
+        $transaction = factory(App\Transaction::class)->create([
+            'user_id'           => $user->id,
+            'agent_source'      => $dest_agent->account,
+            'agent_destination' => $dest_agent->id
+        ]);
+
+        // Act
+        $result = $this->get('/api/transactions/' . $transaction->id, $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(200)
+            ->seeJsonStructure([
+                'id', 'date_start', 'date_end', 'date_creation', 'state', 'concept', 'agent_destination', 'agent_source',
+                'amount_source', 'currency_source', 'amount_destination', 'amount_estimated', 'currency_destination'
             ]);
     }
 }
