@@ -41,14 +41,11 @@ class TransactionsControllerTest extends BrowserKitTestCase
     public function given_authorizedUserWithTransactions_When_getTransactions_Then_ReturnsUserTransactions() {
 
         $user = factory(App\User::class)->create();
-        $source_agent = factory(App\Agent::class)->create([
-            'user_id' => $user->id]);
-        $source_agent->user()->associate($user);
         $dest_agent = factory(App\Agent::class)->create();
 
         factory(App\Transaction::class)->create([
             'user_id' => $user->id,
-            'agent_source' => $source_agent->id,
+            'agent_source' => $dest_agent->account,
             'agent_destination' => $dest_agent->id
         ]);
 
@@ -144,13 +141,11 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         // Arrange
         $user = factory(App\User::class)->create();
-        $source_agent = factory(App\Agent::class)->create(['user_id' => $user->id]);
-        $source_agent->user()->associate($user);
 
         $dest_agent = factory(App\Agent::class)->create();
         $transaction = factory(App\Transaction::class)->create([
             'user_id'           => $user->id,
-            'agent_source'      => $source_agent->id,
+            'agent_source'      => $dest_agent->account,
             'agent_destination' => $dest_agent->id
         ]);
 

@@ -41,11 +41,12 @@ class TransactionTest extends BrowserKitTestCase
         $user = factory(App\User::class)->create([]);
 
         $agent = factory(App\Agent::class)->create([
-            'user_id'   => $user->id
+            'user_id'   => $user->id,
+            'account'   => 'foo'
         ]);
 
         $transaction = factory(App\Transaction::class)->create([
-            'agent_source' => $agent->id
+            'agent_source' => $agent->account
         ]);
 
         // Act
@@ -53,6 +54,6 @@ class TransactionTest extends BrowserKitTestCase
 
         // Assert
         self::assertNotNull($result);
-        self::assertEquals($agent->id,$result->id);
+        self::assertEquals($agent->id, $result->id);
     }
 }
