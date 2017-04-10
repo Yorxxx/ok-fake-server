@@ -36,4 +36,5 @@ $api->version('v1', ['middleware' => 'api.auth'], function ($api) {
     $api->get('settings', 'App\Http\Controllers\SettingsController@getSettings');
     $api->get('agents', 'App\Http\Controllers\AgentsController@getAgents');
     $api->get('transactions', 'App\Http\Controllers\TransactionsController@getTransactions');
+    $api->get('transactions/{id}', 'App\Http\Controllers\TransactionsController@show');
 });

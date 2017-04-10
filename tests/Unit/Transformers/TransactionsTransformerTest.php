@@ -20,12 +20,15 @@ class TransactionsTransformerTest extends BrowserKitTestCase
         $dest_user = factory(App\User::class)->create([]);
 
         $source_agent = factory(App\Agent::class)->create([
-            'user_id'   => $source_user->id
+            'user_id'   => $source_user->id,
+            'account'   => '44444'
         ]);
         $dest_agent = factory(App\Agent::class)->create([
             'user_id'   => $dest_user->id,
             'name'      => "Foo Bar",
-            'phone'     => "+44-123456789"
+            'phone'     => "+44-123456789",
+            'account'   => "5555",
+            'country'   => "ES"
         ]);
 
         $transaction = factory(App\Transaction::class)->create([
@@ -56,6 +59,8 @@ class TransactionsTransformerTest extends BrowserKitTestCase
         self::assertArrayHasKey('amount_source', $result);
         self::assertArrayHasKey('currency_source', $result);
         self::assertArrayHasKey('agent_destination', $result);
+        self::assertArrayHasKey('agent_source', $result);
+
         self::assertEquals($transaction->id, $result['id']);
         self::assertNotNull($result['date_start']);
         self::assertNotNull($result['date_end']);
@@ -66,12 +71,22 @@ class TransactionsTransformerTest extends BrowserKitTestCase
         self::assertEquals("concepto", $result['concept']);
         self::assertEquals("EUR", $result['currency_destination']);
 
-        $result_agent = $result['agent_destination'];
-        self::assertNotNull($result_agent);
-        self::assertArrayHasKey('id', $result_agent);
-        self::assertArrayHasKey('name', $result_agent);
-        self::assertArrayHasKey('phone', $result_agent);
-        self::assertArrayHasKey('prefix', $result_agent);
-        self::assertEquals("Foo Bar", $result_agent['name']);
+        $result_dest_agent = $result['agent_destination'];
+        self::assertNotNull($result_dest_agent);
+        self::assertArrayHasKey('id', $result_dest_agent);
+        self::assertArrayHasKey('name', $result_dest_agent);
+        self::assertArrayHasKey('phone', $result_dest_agent);
+        self::assertArrayHasKey('prefix', $result_dest_agent);
+        self::assertArrayHasKey('account', $result_dest_agent);
+        self::assertArrayHasKey('country', $result_dest_agent);
+        self::assertArrayHasKey('sort_code', $result_dest_agent);
+        self::assertEquals("Foo Bar", $result_dest_agent['name']);
+        self::assertEquals("5555", $result_dest_agent['account']);
+        self::assertEquals("ES", $result_dest_agent['country']);
+
+        $result_source_agent = $result['agent_source'];
+        self::assertNotNull($result_source_agent);
+        self::assertArrayHasKey('account', $result_source_agent);
+        self::assertEquals("44444", $result_source_agent['account']);
     }
 }
