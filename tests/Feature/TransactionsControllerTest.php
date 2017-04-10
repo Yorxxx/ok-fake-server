@@ -1,10 +1,7 @@
 <?php
 
 use Tests\BrowserKitTestCase;
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class TransactionsControllerTest extends BrowserKitTestCase
 {
@@ -13,6 +10,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
     /**
      * @test
      * Test: GET: /api/transactions
+     * Requesting a detailed transaction without authorization, should return 401
      */
     public function given_noAuthorization_When_getTransactions_Then_Returns401()
     {
@@ -22,6 +20,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
     /**
      * @test
      * Test: GET: /api/transactions
+     * Requesting transactions for current user without having performed any of them, should return an empty list
      */
     public function given_authorizedUserWithoutTransactions_When_getTransactions_Then_ReturnsEmptyList() {
 
@@ -37,6 +36,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
     /**
      * @test
      * Test: GET: /api/transactions
+     * Requesting user transactions should return a list containing all the transactions associated to the user
      */
     public function given_authorizedUserWithTransactions_When_getTransactions_Then_ReturnsUserTransactions() {
 
@@ -67,6 +67,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
     /**
      * @test
      * Test: GET: /api/transactions/{id}
+     * Requesting a transaction by a non-existing id, should return error
      */
     public function given_notFoundTransactionId_When_show_Then_ReturnsNotFoundError() {
 
@@ -95,6 +96,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
     /**
      * @test
      * Test: GET: /api/transactions/{id}
+     * Requesting a transaction by id without Authorization should be forbidden
      */
     public function given_noAuthorization_When_show_Then_Returns401() {
 
@@ -108,6 +110,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
     /**
      * @test
      * TEST: GET /api/transactions/{id}
+     * Requesting a transaction by id with Authorization but not performed by user, should be forbidden
      */
     public function given_notAuthorizedTransaction_When_Show_Then_Returns403() {
 
@@ -118,7 +121,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $source_agent = factory(App\Agent::class)->create();
         $dest_agent = factory(App\Agent::class)->create();
 
-        $transaction = factory(App\Transaction::class)->create([
+        factory(App\Transaction::class)->create([
             'id'                => 10,
             'user_id'           => $user->id,
             'agent_source'      => $source_agent->id,
@@ -135,6 +138,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
     /**
      * @test
      * TEST: GET /api/transactions/{id}
+     * Requesting an authorized transaction by id performed by current user, should return the transaction details
      */
     public function given_AuthorizedExistingTransaction_When_Show_Then_ReturnsTransaction() {
 

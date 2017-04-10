@@ -15,6 +15,7 @@ class UserControllerTest extends BrowserKitTestCase
      * @test
      *
      * Test: POST /api/authenticate
+     * Authenticating without specifying the document value, throws error
      */
     public function given_missingdocument_when_authenticate_Then_Returns400() {
 
@@ -26,6 +27,7 @@ class UserControllerTest extends BrowserKitTestCase
      * @test
      *
      * Test: POST /api/authenticate
+     * Authenticating without doctype throws error
      */
     public function given_missingdoctype_when_authenticate_Then_Returns400() {
 
@@ -37,20 +39,19 @@ class UserControllerTest extends BrowserKitTestCase
      * @test
      *
      * Test: POST /api/authenticate.
+     * Authenticating with valid data should return authorization token.
      */
     public function given_existingUser_when_authenticate_Then_ReturnsToken()
     {
-        $user = factory(App\User::class)->create([
-            'phone' => "123456789",
-            'name' => 'Foo Bar',
+        factory(App\User::class)->create([
             'document' => '123456789',
             'doctype' => 'N',
-            'password' => bcrypt('foo')]);
+            'password' => bcrypt('foo')]
+        );
 
         $this->post('/api/authenticate', [
             'document' => '123456789',
             'password' => 'foo',
-            'first_name' => 'Foo',
             'doctype' => 'N'])
             ->seeJsonStructure(['token']);
     }
@@ -58,6 +59,7 @@ class UserControllerTest extends BrowserKitTestCase
     /**
      * @test
      * Test: POST /api/authenticate
+     * Authenticating with non existing user throws an error
      */
     public function given_nonExistingUser_when_authenticate_Then_Returns401() {
         $this->post('/api/authenticate', ['document' => "foo", 'password' => 'foo', 'doctype' => 'P'])
@@ -68,6 +70,7 @@ class UserControllerTest extends BrowserKitTestCase
     /**
      * @test
      * Test: POST /api/authenticate
+     * Authenticating with an invalid doctype, throws an Error
      */
     public function given_unsupportedDocType_When_authenticate_Then_Returns400() {
         $this->post('/api/authenticate', ['document' => "foo", 'password' => 'foo', 'doctype' => 'A'])
@@ -78,6 +81,7 @@ class UserControllerTest extends BrowserKitTestCase
     /**
      * @test
      * Test: GET /api/users/me
+     * Requesting user detail without authorization, throws error
      */
     public function given_unauthorizedUser_when_getMe_Then_Returns401() {
         $this->get('/api/users/me')
@@ -87,6 +91,7 @@ class UserControllerTest extends BrowserKitTestCase
     /**
      * @test
      * Test: GET /api/users/me
+     * Requesting user detail, returns user info
      */
     public function given_authorizedUser_when_getAuthenticatedUser_Then_ReturnsUser() {
         $user = factory(App\User::class)->create([
@@ -112,34 +117,6 @@ class UserControllerTest extends BrowserKitTestCase
                     'phone' => '646547055'
                 ]
             ])
-            ->seeStatusCode(200);
-    }
-
-    /**
-     * @test
-     * Test: GET /api/users/me
-     */
-    public function given_authorizedUserWithoutOptionalValues_When_getAuthenticatedUser_Then_ReturnsUserWithoutOptionalKeys()
-    {
-        $user = factory(App\User::class)->create([
-            'document' => '123456789',
-            'doctype' => 'N',
-            'email' => 'foo@bar.com',
-            'phone' => null,
-            'password' => bcrypt('foo')]);
-
-        $headers = $this->headers($user);
-        self::assertArrayHasKey("Accept", $headers);
-        self::assertArrayHasKey("Authorization", $headers);
-        $this->get('/api/users/me', $headers)
-            ->seeJson([
-                'username'    => $user->document,
-                'documentType' => $user->doctype,
-                'id' => $user->id,
-                'email' => $user->email,
-            ])
-            ->dontSeeText('prefix')
-            ->dontSeeText('phone')
             ->seeStatusCode(200);
     }
 }
