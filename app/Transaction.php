@@ -19,4 +19,28 @@ class Transaction extends Model
      * @var array
      */
     protected $guarded = ['id'];
+
+    /**
+     * Returns the user associated
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user() {
+        return $this->belongsTo('App\User');
+    }
+
+    /**
+     * Return the destination agent
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function destination() {
+        return $this->hasOne('App\Agent', 'id', 'agent_destination');
+    }
+
+    /**
+     * Returns the source agent
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function source() {
+        return $this->hasOne('App\Agent');
+    }
 }

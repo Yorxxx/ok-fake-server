@@ -18,4 +18,20 @@ class Agent extends Model
      * @var array
      */
     protected $guarded = ['id'];
+
+    /**
+     * Returns the user associated to this agent
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user() {
+        return $this->belongsTo('App\User');
+    }
+
+    /**
+     * Returns the received transactions from this agent
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function receivedTransactions() {
+        return $this->hasMany('App\Transaction', 'agent_destination');
+    }
 }

@@ -7,6 +7,7 @@ use App\Transformers\AgentsTranformer;
 use Dingo\Api\Routing\Helpers;
 use Illuminate\Http\Request;
 use JWTAuth;
+use App\User;
 
 class AgentsController extends Controller
 {
@@ -31,7 +32,8 @@ class AgentsController extends Controller
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
             return response()->json(['token_absent'], $e->getStatusCode());
         }
-        $data = Agent::where('user_id', $user->id)->get();
+        $data = $user->agents;
+        //Agent::where('user_id', $user->id)->get();
         return $this->collection($data, new AgentsTranformer, ['key' => 'results']);
     }
 }

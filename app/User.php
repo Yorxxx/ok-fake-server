@@ -30,4 +30,20 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    /**
+     * Returns the transactions associated to this user
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function transactions() {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * Returns the agents of the user
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function agents() {
+        return $this->hasMany('App\Agent');
+    }
 }
