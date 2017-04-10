@@ -20,4 +20,11 @@ class Account extends Model
      * @var array
      */
     protected $guarded = ['id'];
+
+    /**
+     * Returns the user associated to this account
+     */
+    public function user() {
+        return $this->belongsTo('App\User');
+    }
 }
