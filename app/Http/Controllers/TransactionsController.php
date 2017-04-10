@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Agent;
-use App\Transformers\AgentsTranformer;
+use App\Transaction;
+use App\Transformers\TransactionsTranformer;
 use Dingo\Api\Routing\Helpers;
 use Illuminate\Http\Request;
 use JWTAuth;
-use App\User;
 
-class AgentsController extends Controller
+
+class TransactionsController extends Controller
 {
     use Helpers;
 
     /**
-     * Returns the agents for the current user
-     * @GET('/api/agents')
-     * @Response(200, $agents)
+     * Returns the transactions for the current user
+     * @GET('/api/transactions')
+     * @Response(200, $transactions)
      */
-    public function getAgents() {
+    public function getTransactions() {
 
         try {
             $token = JWTAuth::getToken();
@@ -32,8 +32,8 @@ class AgentsController extends Controller
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
             return response()->json(['token_absent'], $e->getStatusCode());
         }
-        $data = $user->agents;
-        //Agent::where('user_id', $user->id)->get();
-        return $this->collection($data, new AgentsTranformer, ['key' => 'results']);
+        $data = $user->transactions; //Transaction::where('user_id', $user->id)->get();
+        return $this->collection($data, new TransactionsTranformer, ['key' => 'results']);
+        //return $this->response()->accepted();
     }
 }

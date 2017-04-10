@@ -56,7 +56,7 @@ $factory->define(App\Setting::class, function (Faker\Generator $faker) {
         'app_notifications' => random_int(0, 1),
         'user_id' => function() {
             // Get a random user to work with
-            $user = User::orderBy(DB::raw('RAND()'))->take(1)->get();
+            $user = User::inRandomOrder()->first();
             return $user->id;
         }
     ];
@@ -73,8 +73,42 @@ $factory->define(App\Agent::class, function(\Faker\Generator $faker) {
         'country' => $faker->country,
         'user_id' => function() {
             // Get a random user to work with
-            $user = User::orderBy(DB::raw('RAND()'))->take(1)->get();
+            $user = User::inRandomOrder()->first();
             return $user->id;
         }
+    ];
+});
+
+$factory->define(App\Transaction::class, function(\Faker\Generator $faker) {
+
+    $date = $faker->dateTimeThisMonth;
+
+    return [
+        'concept' => $faker->name,
+        'amount_source' => $faker->randomFloat(3, 10, 10000),
+        'amount_destination' => $faker->randomFloat(3, 10, 10000),
+        'currency_source' => 'EUR',
+        'currency_destination' => 'EUR',
+        'state' => random_int(0, 8),
+        'frequency' => random_int(0, 10),
+        'sms_custom_text' => $faker->sentence,
+        'agent_destination' =>  function() {
+            // Get a random user to work with
+            $user = User::inRandomOrder()->first();
+            return $user->id;
+        },
+        'agent_source' =>  function() {
+            // Get a random user to work with
+            $user = User::inRandomOrder()->first();
+            return $user->id;
+        },
+        'user_id' =>  function() {
+            // Get a random user to work with
+            $user = User::inRandomOrder()->first();
+            return $user->id;
+        },
+        'date_creation' => $date,
+        'date_start' => $date->add(date_interval_create_from_date_string('2 days')),
+        'date_end' => $date->add(date_interval_create_from_date_string('5 days'))
     ];
 });
