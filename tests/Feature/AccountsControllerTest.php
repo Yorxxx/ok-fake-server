@@ -110,11 +110,74 @@ class AccountsControllerTest extends BrowserKitTestCase
             'password' => bcrypt('foo')]);
 
         $account = factory(\App\Account::class)->create([
-            'user_id'   => $user->id
+            'user_id'   => $user->id,
+            'linked'    => 0
         ]);
 
         // Act
         $this->post('/api/accounts/' . $account->id . '/link', [], $this->headers($user))
             ->seeStatusCode(202);
+
+        $account = \App\Account::where('user_id', $user->id)->first();
+
+        self::assertNotNull($account);
+        self::assertTrue((bool)$account->linked);
+    }
+
+    /**
+     * @test
+     * @POST('/api/accounts/{id}/unlink')
+     * Unauthorized users are not allowed to unlink accounts
+     */
+    public function given_unauthorizedUser_When_Unlink_Then_Returns400() {
+
+        $this->post('/api/accounts/535/unlink', [])
+            ->seeStatusCode(401);
+    }
+
+    /**
+     * @test
+     * @POST('/api/accounts/{id}/unlink')
+     * Trying to unlink external accounts is forbidden
+     */
+    public function given_externalUser_When_Unlink_Then_Returns403() {
+
+        // Arrange
+        $currentuser = factory(App\User::class)->create();
+
+        $user = factory(\App\User::class)->create();
+
+        $account = factory(\App\Account::class)->create([
+            'user_id'   => $user->id
+        ]);
+
+        // Act
+        $this->post('/api/accounts/' . $account->id .'/unlink', [], $this->headers($currentuser))
+            ->seeStatusCode(403)
+            ->seeText("Cannot unlink an account that does not belongs to you");
+    }
+
+    /**
+     * @test
+     * @POST('/api/accounts/{id}/unlink')
+     * Users should be able to unlink their accounts
+     */
+    public function given_currentUserAccount_When_Unlink_Then_Returns202() {
+        // Arrange
+        $user = factory(App\User::class)->create();
+
+        $account = factory(\App\Account::class)->create([
+            'user_id'   => $user->id,
+            'linked'    => 1
+        ]);
+
+        // Act
+        $this->post('/api/accounts/' . $account->id . '/unlink', [], $this->headers($user))
+            ->seeStatusCode(202);
+
+        $account = \App\Account::where('user_id', $user->id)->first();
+
+        self::assertNotNull($account);
+        self::assertFalse((bool)$account->linked);
     }
 }
