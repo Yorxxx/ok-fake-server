@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Transaction;
 use App\Transformers\TransactionsTranformer;
+use Dingo\Api\Http\Request;
 use Dingo\Api\Routing\Helpers;
 
 
@@ -34,5 +35,15 @@ class TransactionsController extends AuthController
             return $this->response->errorForbidden();
         }
         return $this->item($data, new TransactionsTranformer);
+    }
+
+    /**
+     * Stores a new transaction
+     * @POST('/api/transactions')
+     * @param Request $request the request
+     * @return \Dingo\Api\Http\Response
+     */
+    public function store(Request $request) {
+        return $this->response->accepted();
     }
 }

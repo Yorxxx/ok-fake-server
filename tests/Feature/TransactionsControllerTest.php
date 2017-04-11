@@ -160,4 +160,26 @@ class TransactionsControllerTest extends BrowserKitTestCase
                 'amount_source', 'currency_source', 'amount_destination', 'amount_estimated', 'currency_destination'
             ]);
     }
+
+    /**
+     * @test
+     * @POST('/api/transactions/')
+     * Posting a new transaction when not logged in is forbidden
+     */
+    public function given_noAuthorization_When_store_Then_Returns401() {
+
+        // Act
+        $result = $this->post('/api/transactions/', [
+            'emisor_account'            => 534,
+            'agent_destination'         => 4256,
+            'concept'                   => 'foo',
+            'amount'                    => 50,
+            'amount_estimated'          => "42.5",
+            'currency_source'           => 'EUR',
+            'currency_destination'      => 'EUR'
+        ]);
+
+        // Assert
+        $result->seeStatusCode(401);
+    }
 }
