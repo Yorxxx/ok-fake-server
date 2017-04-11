@@ -6,14 +6,11 @@ use App\Agent;
 use App\Transformers\AgentsTranformer;
 use Dingo\Api\Routing\Helpers;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use JWTAuth;
-use App\User;
 use Exception;
 
 class AgentsController extends AuthController
 {
-    use Helpers;
 
     /**
      * Returns the agents for the current user

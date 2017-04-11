@@ -8,8 +8,6 @@ use Dingo\Api\Routing\Helpers;
 
 class AccountsController extends AuthController
 {
-    use Helpers;
-
     /**
      * Returns the accounts
      * @GET('/api/accounts')

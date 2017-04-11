@@ -4,15 +4,12 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Requests;
-use Dingo\Api\Routing\Helpers;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use JWTAuth;
 
 class AuthenticateController extends AuthController
 {
-
-    use Helpers;
 
     /**
      * Authenticates a user

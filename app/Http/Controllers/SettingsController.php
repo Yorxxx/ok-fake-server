@@ -3,15 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Setting;
-use Dingo\Api\Routing\Helpers;
 use App\Transformers\SettingsTranformer;
 
 
 
 class SettingsController extends AuthController
 {
-    use Helpers;
-
     /**
      * Returns the settings for the current user
      * @GET('/api/settings')

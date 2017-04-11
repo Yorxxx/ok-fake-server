@@ -9,8 +9,6 @@ use Dingo\Api\Routing\Helpers;
 
 class TransactionsController extends AuthController
 {
-    use Helpers;
-
     /**
      * Returns the transactions for the current user
      * @GET('/api/transactions')
