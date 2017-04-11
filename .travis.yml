@@ -19,10 +19,10 @@ env:
   - API_PREFIX=true
 
 before_script:
-  - composer install
-  - php artisan vendor:publish —provider="Dingo\Api\Provider\LaravelServiceProvider"
-  - php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\JWTAuthServiceProvider"
-  - php artisan jwt:generate
+  - composer install;
+  - php artisan vendor:publish —provider="Dingo\Api\Provider\LaravelServiceProvider";
+  - php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\JWTAuthServiceProvider";
+  - php artisan jwt:generate;
 
 # omitting "script:" will default to phpunit
 script: vendor/bin/phpunit --coverage-text
