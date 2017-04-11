@@ -41,7 +41,7 @@ class AccountsController extends Controller
      * @POST('/api/accounts/{id}/link')
      * @Response(200)
      */
-    public function link() {
+    public function link($id) {
         try {
             $token = JWTAuth::getToken();
             if (!$user = JWTAuth::toUser($token)) {
@@ -54,6 +54,8 @@ class AccountsController extends Controller
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
             return response()->json(['token_absent'], $e->getStatusCode());
         }
+        if (strcmp($id, $user->id) != 0)
+            return $this->response->errorForbidden();
         return $this->response->accepted();
     }
 }

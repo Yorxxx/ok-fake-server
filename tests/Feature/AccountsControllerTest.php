@@ -63,11 +63,47 @@ class AccountsControllerTest extends BrowserKitTestCase
 
     /**
      * @test
-     * Test POST /api/accounts/{id}/link
+     * @POST('/api/accounts/{id}/link')
+     * Unauthorized users are not allowed to link accounts
      */
     public function given_unauthorizedUser_When_Link_Then_Returns400() {
 
-        $this->post('/api/accounts/535/link')
+        $this->post('/api/accounts/535/link', [])
             ->seeStatusCode(401);
+    }
+
+    /**
+     * @test
+     * @POST('/api/accounts/{id}/link')
+     * Trying to link external accounts is forbidden
+     */
+    public function given_externalUser_When_Link_Then_Returns403() {
+
+        // Arrange
+        $user = factory(App\User::class)->create([
+            'document' => '123456789',
+            'doctype' => 'N',
+            'password' => bcrypt('foo')]);
+
+        // Act
+        $this->post('/api/accounts/535/link', [], $this->headers($user))
+            ->seeStatusCode(403);
+    }
+
+    /**
+     * @test
+     * @POST('/api/accounts/{id}/link')
+     * Users should be able to link their accounts
+     */
+    public function given_user_When_Link_Then_Returns202() {
+        // Arrange
+        $user = factory(App\User::class)->create([
+            'document' => '123456789',
+            'doctype' => 'N',
+            'password' => bcrypt('foo')]);
+
+        // Act
+        $this->post('/api/accounts/' . $user->id . '/link', [], $this->headers($user))
+            ->seeStatusCode(202);
     }
 }
