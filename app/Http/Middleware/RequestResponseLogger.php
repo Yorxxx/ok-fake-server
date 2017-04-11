@@ -22,6 +22,7 @@ class RequestResponseLogger
     public function terminate($request, $response)
     {
         if (function_exists('getallheaders')) {
+            // @codeCoverageIgnoreStart
             $headers = json_decode(json_encode(getallheaders()), true);
             if (array_key_exists('Authorization', $headers)) {
                 Log::info('requests', [
@@ -32,6 +33,7 @@ class RequestResponseLogger
                     'response' => $response
                 ]);
             }
+            // @codeCoverageIgnoreEnd
         }
         else {
             Log::info('requests', [

@@ -45,7 +45,7 @@ class AgentsController extends AuthController
 
             $transformer = new AgentsTranformer;
 
-            if ($agent = Agent::Create($transformer->mapFromRequest($values))) {
+            if ($agent = Agent::create($transformer->mapFromRequest($values))) {
                 return $this->response->item($agent, new AgentsTranformer);
             }
         } catch (Exception $e) {
