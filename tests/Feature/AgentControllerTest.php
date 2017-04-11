@@ -61,18 +61,6 @@ class AgentControllerTest extends BrowserKitTestCase
         // Act
         $this->get('/api/agents', $this->headers($user))
             ->seeStatusCode(200)
-//            ->seeJsonEquals([
-//                'results' => [
-//                    '0' => [
-//                        'account'   => $agent1->id,
-//                        'country'   => $agent1->country,
-//                        'email'     => $agent1->email,
-//                        'name'      => $agent1->name,
-//                        'owner'     => false,
-//                        'phone'     => $agent1->phone
-//                    ]
-//                ]
-//            ]);
             ->seeJsonStructure([
                 "results" => [
                     '*' => ['account', 'country', 'email', 'name', 'owner', 'phone', 'prefix']
@@ -80,4 +68,78 @@ class AgentControllerTest extends BrowserKitTestCase
             ]);
     }
 
+    /**
+     * @test
+     * POST /api/agents
+     * Adding new agents when not authorized should be forbidden
+     */
+    public function given_unauthorizedUser_When_AddAgent_Then_Returns401() {
+
+        $this->post('/api/agents', [
+            'owner'     => false,
+            'name'      => 'Foo Bar',
+            'phone'     => 665547878,
+            'prefix'    => 34,
+            'account'   => "ES1521002719380200073017",
+            'email'     => '',
+            'country'   => 'ES'])
+            ->seeStatusCode(401);
+    }
+
+    /**
+     * @test
+     * @POST('/api/agents')
+     * Authorized users are allowed to add new agents
+     */
+    public function given_authorizedUser_When_AddAgent_Then_Returns202() {
+
+        // Arrange
+        $user = factory(App\User::class)->create([
+            'document' => '123456789',
+            'doctype' => 'N',
+            'password' => bcrypt('foo')]);
+
+
+        // Act
+        $result = $this->post('/api/agents', [
+            'owner'     => false,
+            'name'      => 'Foo Bar',
+            'phone'     => 665547878,
+            'prefix'    => 34,
+            'account'   => "ES1521002719380200073017",
+            'email'     => '',
+            'country'   => 'ES'], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(200)
+            ->seeJsonStructure([
+                'owner', 'name', 'phone', 'prefix', 'account', 'email', 'country', 'user_id', 'id'
+            ]);
+    }
+
+    /**
+     * @test
+     * @POST('/api/agents)
+     * Trying to add an agent with missing required params (like account or name), should throw a bad request error
+     */
+    public function given_missingRequiredParams_When_AddAgent_Then_Returns400() {
+
+        // Arrange
+        $user = factory(App\User::class)->create([
+            'document' => '123456789',
+            'doctype' => 'N',
+            'password' => bcrypt('foo')]);
+
+
+        // Act
+        $result = $this->post('/api/agents', [
+            'owner'     => false,
+            'phone'     => 665547878,
+            'prefix'    => 34,
+            'email'     => '',
+            'country'   => 'ES'], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(400);
+    }
 }

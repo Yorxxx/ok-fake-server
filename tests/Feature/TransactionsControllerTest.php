@@ -1,6 +1,7 @@
 <?php
 
 use Tests\BrowserKitTestCase;
+use App\Agent;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class TransactionsControllerTest extends BrowserKitTestCase

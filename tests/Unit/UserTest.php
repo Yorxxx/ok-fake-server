@@ -41,6 +41,9 @@ class UserTest extends BrowserKitTestCase
     public function given_userWithTransaction_When_transactions_Then_ReturnsTransaction() {
 
         $user = factory(App\User::class)->create([]);
+        factory(App\Agent::class)->create([
+            'user_id'   => $user->id
+        ]);
 
         $transaction = factory(App\Transaction::class)->create([
             'user_id' => $user->id
