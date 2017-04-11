@@ -111,6 +111,35 @@ class AgentControllerTest extends BrowserKitTestCase
             'country'   => 'ES'], $this->headers($user));
 
         // Assert
-        $result->seeStatusCode(202);
+        $result->seeStatusCode(200)
+            ->seeJsonStructure([
+                'owner', 'name', 'phone', 'prefix', 'account', 'email', 'country', 'user_id', 'id'
+            ]);
+    }
+
+    /**
+     * @test
+     * @POST('/api/agents)
+     * Trying to add an agent with missing required params (like account or name), should throw a bad request error
+     */
+    public function given_missingRequiredParams_When_AddAgent_Then_Returns400() {
+
+        // Arrange
+        $user = factory(App\User::class)->create([
+            'document' => '123456789',
+            'doctype' => 'N',
+            'password' => bcrypt('foo')]);
+
+
+        // Act
+        $result = $this->post('/api/agents', [
+            'owner'     => false,
+            'phone'     => 665547878,
+            'prefix'    => 34,
+            'email'     => '',
+            'country'   => 'ES'], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(400);
     }
 }

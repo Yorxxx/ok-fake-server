@@ -4,7 +4,9 @@ namespace App\Transformers;
 use App\Account;
 use App\Agent;
 use App\Setting;
+use Illuminate\Validation\ValidationException;
 use League\Fractal\TransformerAbstract;
+use Illuminate\Http\Request;
 
 class AgentsTranformer extends TransformerAbstract
 {
@@ -26,7 +28,29 @@ class AgentsTranformer extends TransformerAbstract
             'email'             => $agent->email,
             'country'           => $agent->country,
             'prefix'            => $prefix,
-            'phone'             => $phone
+            'phone'             => $phone,
+            'user_id'           => $agent->user != null ? $agent->user->id : 0
+        ];
+    }
+
+    /**
+     * Maps the expected input request values into Laravel expected models
+     * Does not validate any data. You should validate the incoming data before mapping
+     * @param $values array containing the request data
+     * @return array with mappable data
+     */
+    public function mapFromRequest($values) {
+        if ($values == null)
+            return null;
+
+        return [
+            'account' => $values['account'],
+            'owner' => array_key_exists('owner', $values) ? $values['owner'] : false,
+            'name' => $values['name'],
+            'phone' => '+'.$values['prefix'].'-'.$values['phone'],
+            'email' => array_key_exists('email', $values) ? $values['email'] : '',
+            'country' => array_key_exists('country', $values) ? $values['country'] : '',
+            'user_id' => array_key_exists('user_id', $values) ? $values['user_id'] : ''
         ];
     }
 }
