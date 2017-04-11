@@ -61,18 +61,6 @@ class AgentControllerTest extends BrowserKitTestCase
         // Act
         $this->get('/api/agents', $this->headers($user))
             ->seeStatusCode(200)
-//            ->seeJsonEquals([
-//                'results' => [
-//                    '0' => [
-//                        'account'   => $agent1->id,
-//                        'country'   => $agent1->country,
-//                        'email'     => $agent1->email,
-//                        'name'      => $agent1->name,
-//                        'owner'     => false,
-//                        'phone'     => $agent1->phone
-//                    ]
-//                ]
-//            ]);
             ->seeJsonStructure([
                 "results" => [
                     '*' => ['account', 'country', 'email', 'name', 'owner', 'phone', 'prefix']
@@ -80,4 +68,21 @@ class AgentControllerTest extends BrowserKitTestCase
             ]);
     }
 
+    /**
+     * @test
+     * POST /api/agents
+     * Adding new agents when not authorized should be forbidden
+     */
+    public function given_unauthorizedUser_When_AddAgent_Then_Returns401() {
+
+        $this->post('/api/agents', [
+            'owner'     => false,
+            'name'      => 'Foo Bar',
+            'phone'     => 665547878,
+            'prefix'    => 34,
+            'account'   => "ES1521002719380200073017",
+            'email'     => '',
+            'country'   => 'ES'])
+            ->seeStatusCode(401);
+    }
 }

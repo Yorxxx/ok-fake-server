@@ -36,4 +36,14 @@ class AgentsController extends Controller
         //Agent::where('user_id', $user->id)->get();
         return $this->collection($data, new AgentsTranformer, ['key' => 'results']);
     }
+
+    /**
+     * Stores a new agent for the current user
+     * @POST('/api/agents')
+     * @Response(200, "accepted")
+     * @return \Dingo\Api\Http\Response
+     */
+    public function store() {
+        return $this->response->accepted();
+    }
 }
