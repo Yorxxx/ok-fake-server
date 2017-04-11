@@ -85,4 +85,32 @@ class AgentControllerTest extends BrowserKitTestCase
             'country'   => 'ES'])
             ->seeStatusCode(401);
     }
+
+    /**
+     * @test
+     * @POST('/api/agents')
+     * Authorized users are allowed to add new agents
+     */
+    public function given_authorizedUser_When_AddAgent_Then_Returns202() {
+
+        // Arrange
+        $user = factory(App\User::class)->create([
+            'document' => '123456789',
+            'doctype' => 'N',
+            'password' => bcrypt('foo')]);
+
+
+        // Act
+        $result = $this->post('/api/agents', [
+            'owner'     => false,
+            'name'      => 'Foo Bar',
+            'phone'     => 665547878,
+            'prefix'    => 34,
+            'account'   => "ES1521002719380200073017",
+            'email'     => '',
+            'country'   => 'ES'], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(202);
+    }
 }
