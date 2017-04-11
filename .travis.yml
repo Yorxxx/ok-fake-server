@@ -25,4 +25,7 @@ before_script:
   - php artisan jwt:generate
 
 # omitting "script:" will default to phpunit
-script: vendor/bin/phpunit --coverage-text
+script: vendor/bin/phpunit --coverage-clover=coverage.xml
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
