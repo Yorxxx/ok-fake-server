@@ -6,16 +6,23 @@ php:
   # using major version aliases
 
   # aliased to 5.3.29
-  - 5.3
+  #- 5.3
   # aliased to a recent 5.4.x version
-  - 5.4
+  #- 5.4
   # aliased to a recent 5.5.x version
-  - 5.5
+  #- 5.5
   # aliased to a recent 5.6.x version
   - 5.6
   # aliased to a recent 7.x version
   - 7.0
+env:
+  - API_PREFIX=true
 
-before_script: composer install
+before_script:
+  - composer install
+  - php artisan vendor:publish —provider="Dingo\Api\Provider\LaravelServiceProvider"
+  - php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\JWTAuthServiceProvider"
+  - php artisan jwt:generate
+
 # omitting "script:" will default to phpunit
 script: vendor/bin/phpunit --coverage-text
