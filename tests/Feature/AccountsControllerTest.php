@@ -60,4 +60,14 @@ class AccountsControllerTest extends BrowserKitTestCase
         $this->get('/api/accounts', $this->headers($user))
             ->seeJsonStructure([]);
     }
+
+    /**
+     * @test
+     * Test POST /api/accounts/{id}/link
+     */
+    public function given_unauthorizedUser_When_Link_Then_Returns400() {
+
+        $this->post('/api/accounts/535/link')
+            ->seeStatusCode(401);
+    }
 }

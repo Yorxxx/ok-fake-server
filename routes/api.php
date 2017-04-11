@@ -33,6 +33,7 @@ $api->version('v1', function ($api) {
 $api->version('v1', ['middleware' => 'api.auth'], function ($api) {
     $api->get('users/me', 'App\Http\Controllers\AuthenticateController@getAuthenticatedUser');
     $api->get('accounts', 'App\Http\Controllers\AccountsController@getAccounts');
+    $api->post('accounts/{id}/link', 'App\Http\Controllers\AccountsController@link');
     $api->get('settings', 'App\Http\Controllers\SettingsController@getSettings');
     $api->get('agents', 'App\Http\Controllers\AgentsController@getAgents');
     $api->post('agents', 'App\Http\Controllers\AgentsController@store');
