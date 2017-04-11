@@ -10,6 +10,7 @@
 | database. Just tell the factory how a default model should look.
 |
 */
+use App\Agent;
 use App\User;
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
