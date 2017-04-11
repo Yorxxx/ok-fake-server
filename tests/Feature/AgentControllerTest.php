@@ -122,7 +122,7 @@ class AgentControllerTest extends BrowserKitTestCase
      * @POST('/api/agents)
      * Trying to add an agent with missing required params (like account or name), should throw a bad request error
      */
-    public function given_missingRequiredParams_When_AddAgent_Then_Returns400() {
+    public function given_missingRequiredParams_When_store_Then_Returns400() {
 
         // Arrange
         $user = factory(App\User::class)->create([

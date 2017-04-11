@@ -4,23 +4,20 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Requests;
-use Dingo\Api\Routing\Helpers;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use JWTAuth;
 
-class AuthenticateController extends Controller
+class AuthenticateController extends AuthController
 {
-
-    use Helpers;
 
     /**
      * Authenticates a user
-     * @param Request $request the request data
      * @Post("/authenticate")
-     * @Request("email=foo&password=bar", contentType="application/x-www-form-urlencoded")
-     * @Response(200, body={"token"=<token>}
-     * @return \Illuminate\Http\JsonResponse
+     * @Request(email=foo&password=bar, contentType="application/x-www-form-urlencoded")
+     * @Response(200, body={token=<token>}
+     * @param Request $request the request data
+     * @return \Illuminate\Http\JsonResponse|void
      */
     public function authenticate(Request $request) {
 
@@ -48,29 +45,16 @@ class AuthenticateController extends Controller
 
     /**
      * Returns the authenticated user
-     * TODO strip null values from json in a more fashioned way
      * @Get("/users/me")
      * @Response(200, body={"user"=> $user }
      * @return \Illuminate\Http\JsonResponse
      */
     public function getAuthenticatedUser()
     {
-        try {
-            $token = JWTAuth::getToken();
-            if (!$user = JWTAuth::toUser($token)) {
-                return response()->json(['user_not_found'], 404);
-            }
-        } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-            return response()->json(['token_expired'], $e->getStatusCode());
-        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-            return response()->json(['token_invalid'], $e->getStatusCode());
-        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
-            return response()->json(['token_absent'], $e->getStatusCode());
-        }
+        $user = $this->getUserFromToken();
         // the token is valid and we have found the user via the sub claim
         $first_name = '';
         if ($user->name !== null) {
-            //if (!isEmptyOrNullString()) {
             $first_name = array_values(preg_split('~\s+~', $user->name, -1, PREG_SPLIT_NO_EMPTY))[0];
         }
 
@@ -95,18 +79,7 @@ class AuthenticateController extends Controller
                 ]
             ]
         ];
-        if ($first_name === '') {
-            unset($data['user']['first_name']);
-        }
-        if ($prefix === '') {
-            unset($data['user']['phone']['prefix']);
-        }
-        if ($phone === '') {
-            unset($data['user']['phone']['phone']);
-        }
-        if (empty($data['user']['phone'])) {
-            unset($data['user']['phone']);
-        }
+
         return response()->json($data);
     }
 }
