@@ -61,4 +61,28 @@ class UserTest extends BrowserKitTestCase
         self::assertEquals($transaction->id, $result[0]->id);
         self::assertEquals($transaction2->id, $result[1]->id);
     }
+
+    /**
+     * @test
+     * Given a user with accounts, should be able to return them
+     */
+    public function given_userAccounts_When_Accounts_Then_ReturnsUserAccounts() {
+
+        $user = factory(App\User::class)->create([]);
+        $account1 = factory(App\Account::class)->create([
+            'user_id'       => $user->id
+        ]);
+        $account2 = factory(App\Account::class)->create([
+            'user_id'       => $user->id
+        ]);
+
+        // Act
+        $result = $user->accounts;
+
+        // Assert
+        self::assertNotNull($result);
+        self::assertCount(2, $result);
+        self::assertEquals($user->id, $result[0]->user_id);
+        self::assertEquals($user->id, $result[1]->user_id);
+    }
 }

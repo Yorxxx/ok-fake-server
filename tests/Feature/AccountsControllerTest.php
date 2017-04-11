@@ -80,14 +80,21 @@ class AccountsControllerTest extends BrowserKitTestCase
     public function given_externalUser_When_Link_Then_Returns403() {
 
         // Arrange
-        $user = factory(App\User::class)->create([
+        $currentuser = factory(App\User::class)->create([
             'document' => '123456789',
             'doctype' => 'N',
             'password' => bcrypt('foo')]);
 
+        $user = factory(\App\User::class)->create();
+
+        $account = factory(\App\Account::class)->create([
+            'user_id'   => $user->id
+        ]);
+
         // Act
-        $this->post('/api/accounts/535/link', [], $this->headers($user))
-            ->seeStatusCode(403);
+        $this->post('/api/accounts/' . $account->id .'/link', [], $this->headers($currentuser))
+            ->seeStatusCode(403)
+            ->seeText("Cannot link an account that does not belongs to you");
     }
 
     /**
@@ -95,15 +102,19 @@ class AccountsControllerTest extends BrowserKitTestCase
      * @POST('/api/accounts/{id}/link')
      * Users should be able to link their accounts
      */
-    public function given_user_When_Link_Then_Returns202() {
+    public function given_currentUserAccount_When_Link_Then_Returns202() {
         // Arrange
         $user = factory(App\User::class)->create([
             'document' => '123456789',
             'doctype' => 'N',
             'password' => bcrypt('foo')]);
 
+        $account = factory(\App\Account::class)->create([
+            'user_id'   => $user->id
+        ]);
+
         // Act
-        $this->post('/api/accounts/' . $user->id . '/link', [], $this->headers($user))
+        $this->post('/api/accounts/' . $account->id . '/link', [], $this->headers($user))
             ->seeStatusCode(202);
     }
 }

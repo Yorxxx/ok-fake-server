@@ -46,4 +46,12 @@ class User extends Authenticatable
     public function agents() {
         return $this->hasMany('App\Agent');
     }
+
+    /**
+     * Returns the accounts of the user;
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function accounts() {
+        return $this->hasMany('App\Account');
+    }
 }

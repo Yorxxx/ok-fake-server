@@ -24,8 +24,13 @@ class AccountsController extends AuthController
      * @Response(200)
      */
     public function link($id) {
-        if (strcmp($id, $this->getUserFromToken()->id) != 0)
-            return $this->response->errorForbidden();
-        return $this->response->accepted();
+        $user = $this->getUserFromToken();
+        $accounts = $user->accounts;
+
+        foreach ($accounts as $account) {
+            if (strcmp($id, $account->id) == 0)
+                return $this->response->accepted();
+        }
+        return $this->response->errorForbidden("Cannot link an account that does not belongs to you");
     }
 }
