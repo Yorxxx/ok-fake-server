@@ -16,7 +16,7 @@ php:
   # aliased to a recent 7.x version
   - 7.0
 env:
-  - API_PREFIX=true
+  - API_PREFIX='api'
 
 before_script:
   - composer install
