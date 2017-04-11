@@ -44,13 +44,13 @@ class AgentsTranformer extends TransformerAbstract
             return null;
 
         return [
-            'account' => $values['account'],
-            'owner' => array_key_exists('owner', $values) ? $values['owner'] : false,
-            'name' => $values['name'],
-            'phone' => '+'.$values['prefix'].'-'.$values['phone'],
-            'email' => array_key_exists('email', $values) ? $values['email'] : '',
-            'country' => array_key_exists('country', $values) ? $values['country'] : '',
-            'user_id' => array_key_exists('user_id', $values) ? $values['user_id'] : ''
+            'account'   => $values['account'],
+            'owner'     => array_key_exists('owner', $values) ? $values['owner'] : false,
+            'name'      => $values['name'],
+            'phone'     => '+'.$values['prefix'].'-'.$values['phone'],
+            'email'     => array_key_exists('email', $values) ? $values['email'] : '',
+            'country'   => array_key_exists('country', $values) ? $values['country'] : '',
+            'user_id'   => array_key_exists('user_id', $values) ? $values['user_id'] : ''
         ];
     }
 }
