@@ -118,4 +118,26 @@ class TransactionsController extends AuthController
         return ['positions'     => array_unique($positions, SORT_NUMERIC),
             'signatureLength'   => 8];
     }
+
+    /**
+     * Confirms the signature
+     * @POST('/api/transactions/{id}/signature_otp')
+     * @Request("signature_positions=[foo1, foo2, foo3]&signatureData=bar"
+     * @param Request $request
+     * @param $id Integer the transaction identifier to confirm
+     * @return \Dingo\Api\Http\Response|void
+     */
+    public function signatureOtp(Request $request, $id) {
+
+        $current_user = $this->getUserFromToken();
+        $transaction = Transaction::where('id', $id)->first();
+        if ($transaction == null) {
+            return $this->response->errorNotFound("Transaction does not exist");
+        }
+        if (strcmp($current_user->id, $transaction->user_id) != 0) {
+            return $this->response->errorForbidden("User does not have permissions to access this transaction");
+        }
+
+        return ['ticket'    => 'something'];
+    }
 }

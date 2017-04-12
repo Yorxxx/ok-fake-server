@@ -44,4 +44,5 @@ $api->version('v1', ['middleware' => 'api.auth'], function ($api) {
     $api->post('transactions', 'App\Http\Controllers\TransactionsController@store');
     $api->get('transactions/{id}', 'App\Http\Controllers\TransactionsController@show');
     $api->get('transactions/{id}/signature_positions', 'App\Http\Controllers\TransactionsController@signaturePositions');
+    $api->post('transactions/{id}/signature_otp', 'App\Http\Controllers\TransactionsController@signatureOtp');
 });
