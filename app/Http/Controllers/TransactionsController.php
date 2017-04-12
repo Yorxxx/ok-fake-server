@@ -118,4 +118,8 @@ class TransactionsController extends AuthController
         return ['positions'     => array_unique($positions, SORT_NUMERIC),
             'signatureLength'   => 8];
     }
+
+    public function signatureOtp($id) {
+        return $this->response->accepted();
+    }
 }

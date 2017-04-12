@@ -567,4 +567,16 @@ class TransactionsControllerTest extends BrowserKitTestCase
                'positions', 'signatureLength'
             ]);
     }
+
+    /**
+     * @test
+     * Confirming signatures without authorization is forbidden
+     */
+    public function given_noAuthorization_When_ConfirmOTP_Then_Returns401() {
+
+        $result = $this->post('/api/transactions/50/signature_otp', []);
+
+        // Assert
+        $result->seeStatusCode(401);
+    }
 }
