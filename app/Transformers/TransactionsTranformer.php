@@ -10,6 +10,13 @@ class TransactionsTranformer extends TransformerAbstract
     public function transform(Transaction $transaction)
     {
 
+        $source = [];
+        if ($transaction->source != null) {
+            $source = [
+                'account'           =>  $transaction->source->account
+            ];
+        }
+
         return [
             'id'                    => $transaction->id,
             'agent_destination'     => [
@@ -21,9 +28,7 @@ class TransactionsTranformer extends TransformerAbstract
                 'country'           => $transaction->destination->country,
                 'sort_code'         => ''
             ],
-            'agent_source'          => [
-                'account'           =>  $transaction->source->account
-            ],
+            'agent_source'          => $source,
             'date_start'            => $transaction->date_start->getTimestamp()*1000,
             'date_end'              => $transaction->date_end->getTimestamp()*1000,
             'date_creation'         => $transaction->date_creation->getTimestamp()*1000,
