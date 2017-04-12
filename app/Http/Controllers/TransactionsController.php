@@ -94,4 +94,28 @@ class TransactionsController extends AuthController
 
         return $this->response->errorInternal();
     }
+
+    /**
+     * Returns the positions from the given transaction
+     * @GET('/api/transactions/{id}/signature_positions')
+     * @Response(200, {positions})
+     * @param $id Integer identifier of the transaction
+     * @return array
+     */
+    public function signaturePositions($id) {
+
+        $current_user = $this->getUserFromToken();
+        $transaction = Transaction::where('id', $id)->first();
+        if ($transaction == null) {
+            return $this->response->errorNotFound("Transaction does not exist");
+        }
+        if (strcmp($current_user->id, $transaction->user_id) != 0) {
+            return $this->response->errorForbidden("User does not have permissions to access this transaction");
+        }
+
+        $positions = [random_int(1, 8), random_int(1, 8), random_int(1, 8), random_int(1, 8)];
+        sort($positions);
+        return ['positions'     => array_unique($positions, SORT_NUMERIC),
+            'signatureLength'   => 8];
+    }
 }

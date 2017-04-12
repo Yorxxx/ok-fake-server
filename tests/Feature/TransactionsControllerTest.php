@@ -493,4 +493,78 @@ class TransactionsControllerTest extends BrowserKitTestCase
         self::assertFalse($updated_account->amount == $account->amount);
         self::assertEquals($updated_account->amount, $account->amount-50);
     }
+
+    /**
+     * @test
+     * Cannot retrieve transaction positions without authorization
+     */
+    public function given_noAuthorization_When_GetPositions_Then_Returns401() {
+
+        $result = $this->get('/api/transactions/50/signature_positions');
+
+        // Assert
+        $result->seeStatusCode(401);
+    }
+
+    /**
+     * @test
+     * Cannot return positions from non-existing transactions
+     */
+    public function given_nonExistingTransaction_When_GetPositions_Then_Returns404() {
+
+        $user = factory(\App\User::class)->create();
+        $agent = factory(Agent::class)->create();
+        $transaction = factory(\App\Transaction::class)->create([
+           'user_id'                => $user->id,
+            'agent_destination'     => $agent->id
+        ]);
+
+        $result = $this->get('/api/transactions/50/signature_positions', $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(404)
+            ->seeText("Transaction does not exist");
+    }
+
+    /**
+     * @test
+     * Trying to get signature positions from transactions not performed by current user is not allowed
+     */
+    public function given_transactionNotPerformedByCurrentUser_When_GetPositions_Then_Returns403() {
+        $current_user = factory(\App\User::class)->create();
+        $user = factory(\App\User::class)->create();
+        $agent = factory(Agent::class)->create();
+        $transaction = factory(\App\Transaction::class)->create([
+            'user_id'                => $user->id,
+            'agent_destination'     => $agent->id
+        ]);
+
+        $result = $this->get('/api/transactions/' . $transaction->id . ' /signature_positions', $this->headers($current_user));
+
+        // Assert
+        $result->seeStatusCode(403)
+            ->seeText("User does not have permissions to access this transaction");
+    }
+
+    /**
+     * @test
+     * Requesting positions for a valid transaction should returns its positions
+     */
+    public function given_validTransaction_When_GetPositions_Then_ReturnsPositions() {
+
+        $user = factory(\App\User::class)->create();
+        $agent = factory(Agent::class)->create();
+        $transaction = factory(\App\Transaction::class)->create([
+            'user_id'                => $user->id,
+            'agent_destination'     => $agent->id
+        ]);
+
+        $result = $this->get('/api/transactions/' . $transaction->id . ' /signature_positions', $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(200)
+            ->seeJsonStructure([
+               'positions', 'signatureLength'
+            ]);
+    }
 }
