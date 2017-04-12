@@ -95,4 +95,65 @@ class TransactionsTransformerTest extends BrowserKitTestCase
         self::assertArrayHasKey('account', $result_source_agent);
         self::assertEquals("5555", $result_source_agent['account']);
     }
+
+    /**
+     * @test
+     * Mapping from null, returns null
+     */
+    public function given_nullValues_When_mapFromRequest_Then_ReturnsNull() {
+
+        $transformer = new \App\Transformers\TransactionsTranformer;
+
+        // Act
+        $result = $transformer->mapFromRequest(null);
+
+        // Assert
+        self::assertNull($result);
+    }
+
+    /**
+     * @test
+     * Mapping from valid input data, should return correct transaction values
+     */
+    public function given_inputValues_When_MapFromRequest_Then_ReturnsCorrectTransactionData() {
+
+        $transformer = new \App\Transformers\TransactionsTranformer;
+
+        $values = [
+            'emisor_account'            => 1,
+            'agent_destination'         => 10,
+            'concept'                   => 'foo',
+            'amount'                    => 50,
+            'amount_estimated'          => "42.5",
+            'currency_source'           => 'EUR',
+            'currency_destination'      => 'EUR'
+        ];
+
+        // Act
+        $result = $transformer->mapFromRequest($values);
+
+        // Assert
+        self::assertNotNull($result);
+        self::assertArrayHasKey('concept', $result);
+        self::assertArrayHasKey('amount_source', $result);
+        self::assertArrayHasKey('amount_destination', $result);
+        self::assertArrayHasKey('currency_source', $result);
+        self::assertArrayHasKey('currency_destination', $result);
+        self::assertArrayHasKey('state', $result);
+        self::assertArrayHasKey('frequency', $result);
+        self::assertArrayHasKey('sms_custom_text', $result);
+        self::assertArrayHasKey('agent_destination', $result);
+        self::assertArrayHasKey('agent_source', $result);
+        self::assertArrayHasKey('user_id', $result);
+
+        self::assertEquals('foo', $result['concept']);
+        self::assertEquals(null, $result['agent_source']);
+        self::assertEquals(10, $result['agent_destination']);
+        self::assertEquals(50, $result['amount_source']);
+        self::assertEquals(42.5, $result['amount_destination']);
+        self::assertEquals("EUR", $result['currency_source']);
+        self::assertEquals("EUR", $result['currency_destination']);
+        self::assertEquals(0, $result['state']);
+        self::assertEquals(1, $result['frequency']);
+    }
 }
