@@ -138,6 +138,21 @@ class TransactionsController extends AuthController
             return $this->response->errorForbidden("User does not have permissions to access this transaction");
         }
 
-        return ['ticket'    => 'something'];
+        return ['ticket'    => $this->generateRandomString()];
+    }
+
+    /**
+     * Generates a random string
+     * @param int $length the desired length of string
+     * @return string the random string
+     */
+    function generateRandomString($length = 10) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
     }
 }
