@@ -147,7 +147,7 @@ class TransactionsTransformerTest extends BrowserKitTestCase
         self::assertArrayHasKey('user_id', $result);
 
         self::assertEquals('foo', $result['concept']);
-        self::assertEquals(1, $result['agent_source']);
+        self::assertEquals(null, $result['agent_source']);
         self::assertEquals(10, $result['agent_destination']);
         self::assertEquals(50, $result['amount_source']);
         self::assertEquals(42.5, $result['amount_destination']);

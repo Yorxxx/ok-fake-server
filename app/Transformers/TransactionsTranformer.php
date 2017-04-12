@@ -57,8 +57,8 @@ class TransactionsTranformer extends TransformerAbstract
             'frequency'             => array_key_exists('frequency', $values) ? $values['frequency'] : 1,
             'sms_custom_text'       => $values['concept'],
             'agent_destination'     => $values['agent_destination'],
-            'agent_source'          => $values['emisor_account'],
-            'user_id'               => array_key_exists('user_id', $values) ? $values['user_id'] : 0
+            'user_id'               => array_key_exists('user_id', $values) ? $values['user_id'] : 0,
+            'agent_source'          => array_key_exists('agent_source', $values) ? $values['agent_source'] : 0
         ];
 
     }
