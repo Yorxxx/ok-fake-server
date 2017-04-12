@@ -634,6 +634,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $result = $this->post('/api/transactions/' . $transaction->id . '/signature_otp', [], $this->headers($user));
 
         // Assert
-        $result->seeStatusCode(202);
+        $result->seeStatusCode(200)
+            ->seeJsonStructure(['ticket']);
     }
 }

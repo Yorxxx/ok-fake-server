@@ -138,6 +138,6 @@ class TransactionsController extends AuthController
             return $this->response->errorForbidden("User does not have permissions to access this transaction");
         }
 
-        return $this->response->accepted();
+        return ['ticket'    => 'something'];
     }
 }
