@@ -36,4 +36,30 @@ class TransactionsTranformer extends TransformerAbstract
             'currency_source'       => $transaction->currency_source
         ];
     }
+
+    /**
+     * Maps the expected input request values into Laravel expected models
+     * Does not validate any data. You should validate the incoming data before mapping
+     * @param $values array containing the request data
+     * @return array with mappable data
+     */
+    public function mapFromRequest($values) {
+        if ($values == null)
+            return null;
+
+        return [
+            'concept'               => $values['concept'],
+            'amount_source'         => $values['amount'],
+            'amount_destination'    => $values['amount_estimated'],
+            'currency_source'       => $values['currency_source'],
+            'currency_destination'  => $values['currency_destination'],
+            'state'                 => array_key_exists('state', $values) ? $values['state'] : 0,
+            'frequency'             => array_key_exists('frequency', $values) ? $values['frequency'] : 0,
+            'sms_custom_text'       => $values['concept'],
+            'agent_destination'     => $values['agent_destination'],
+            'agent_source'          => $values['emisor_account'],
+            'user_id'               => array_key_exists('user_id', $values) ? $values['user_id'] : 0
+        ];
+
+    }
 }
