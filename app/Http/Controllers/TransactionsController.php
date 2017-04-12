@@ -114,15 +114,16 @@ class TransactionsController extends AuthController
         }
 
         $positions = [random_int(1, 8), random_int(1, 8), random_int(1, 8), random_int(1, 8)];
-        sort($positions);
+        sort($positions, SORT_NUMERIC);
         return ['positions'     => array_unique($positions, SORT_NUMERIC),
             'signatureLength'   => 8];
     }
 
     /**
-     * Confirms the signature
+     * Sends an OTP requesting to confirmation
      * @POST('/api/transactions/{id}/signature_otp')
      * @Request("signature_positions=[foo1, foo2, foo3]&signatureData=bar"
+     * @Response(200, {"ticket"="foo"})
      * @param Request $request
      * @param $id Integer the transaction identifier to confirm
      * @return \Dingo\Api\Http\Response|void
@@ -139,5 +140,28 @@ class TransactionsController extends AuthController
         }
 
         return ['ticket'    => 'something'];
+    }
+
+    /**
+     * Validates the signature
+     * @POST('/api/transactions/{id}/signature_confirmation')
+     * @Request("optSmsCode=foo"}
+     * @Response(200)
+     * @param Request $request
+     * @param $id Integer the transaction identifier to confirm
+     * @return \Dingo\Api\Http\Response|void
+     */
+    public function signatureConfirmation(Request $request, $id) {
+
+        $current_user = $this->getUserFromToken();
+        $transaction = Transaction::where('id', $id)->first();
+        if ($transaction == null) {
+            return $this->response->errorNotFound("Transaction does not exist");
+        }
+        if (strcmp($current_user->id, $transaction->user_id) != 0) {
+            return $this->response->errorForbidden("User does not have permissions to access this transaction");
+        }
+
+        return;
     }
 }

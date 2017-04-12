@@ -637,4 +637,73 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $result->seeStatusCode(200)
             ->seeJsonStructure(['ticket']);
     }
+
+    /**
+     * @test
+     * Cannot confirm SMS if user is not authorized
+     */
+    public function given_noAuthorization_When_confirmOtpSMS_Then_Returns401() {
+
+        $result = $this->post('/api/transactions/50/signature_confirmation', []);
+
+        // Assert
+        $result->seeStatusCode(401);
+    }
+
+    /**
+     * @test
+     * Cannot confirm SMS transactions that do not exist on database
+     */
+    public function given_nonExistingTransaction_When_confirmOtpSMS_Then_Returns404() {
+
+        $user = factory(\App\User::class)->create();
+
+        // Act
+        $result = $this->post('/api/transactions/50/signature_confirmation', [], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(404)
+            ->seeText("Transaction does not exist");
+    }
+
+    /**
+     * @test
+     * Trying to confirm transactions not performed by current is forbidden.
+     */
+    public function given_transactionNotPerformedByCurrentUser_When_confirmOtpSMS_Then_Returns403() {
+
+        $current_user = factory(\App\User::class)->create();
+        $user = factory(\App\User::class)->create();
+        $agent = factory(Agent::class)->create();
+        $transaction = factory(\App\Transaction::class)->create([
+            'user_id'                => $user->id,
+            'agent_destination'     => $agent->id
+        ]);
+
+        // Act
+        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_confirmation', [], $this->headers($current_user));
+
+        $result->seeStatusCode(403)
+            ->seeText("User does not have permissions to access this transaction");
+    }
+
+    /**
+     * @test
+     * Confirming transactions performed by current user is allowed
+     */
+    public function given_validTransaction_When_confirmOtpSMS_Then_Returns200() {
+
+        $user = factory(\App\User::class)->create();
+        $agent = factory(Agent::class)->create();
+        $transaction = factory(\App\Transaction::class)->create([
+            'user_id'                => $user->id,
+            'agent_destination'     => $agent->id
+        ]);
+
+        // Act
+        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_confirmation', [], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(200);
+    }
 }
