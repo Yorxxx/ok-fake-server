@@ -54,7 +54,7 @@ class TransactionsTranformer extends TransformerAbstract
             'currency_source'       => $values['currency_source'],
             'currency_destination'  => $values['currency_destination'],
             'state'                 => array_key_exists('state', $values) ? $values['state'] : 0,
-            'frequency'             => array_key_exists('frequency', $values) ? $values['frequency'] : 0,
+            'frequency'             => array_key_exists('frequency', $values) ? $values['frequency'] : 1,
             'sms_custom_text'       => $values['concept'],
             'agent_destination'     => $values['agent_destination'],
             'agent_source'          => $values['emisor_account'],

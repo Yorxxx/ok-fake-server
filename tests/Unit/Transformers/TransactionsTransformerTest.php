@@ -154,7 +154,6 @@ class TransactionsTransformerTest extends BrowserKitTestCase
         self::assertEquals("EUR", $result['currency_source']);
         self::assertEquals("EUR", $result['currency_destination']);
         self::assertEquals(0, $result['state']);
-        self::assertEquals(0, $result['frequency']);
-        self::assertEquals(0, $result['frequency']);
+        self::assertEquals(1, $result['frequency']);
     }
 }
