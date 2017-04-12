@@ -545,4 +545,26 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $result->seeStatusCode(403)
             ->seeText("User does not have permissions to access this transaction");
     }
+
+    /**
+     * @test
+     * Requesting positions for a valid transaction should returns its positions
+     */
+    public function given_validTransaction_When_GetPositions_Then_ReturnsPositions() {
+
+        $user = factory(\App\User::class)->create();
+        $agent = factory(Agent::class)->create();
+        $transaction = factory(\App\Transaction::class)->create([
+            'user_id'                => $user->id,
+            'agent_destination'     => $agent->id
+        ]);
+
+        $result = $this->get('/api/transactions/' . $transaction->id . ' /signature_positions', $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(200)
+            ->seeJsonStructure([
+               'positions', 'signatureLength'
+            ]);
+    }
 }

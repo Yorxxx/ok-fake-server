@@ -100,7 +100,7 @@ class TransactionsController extends AuthController
      * @GET('/api/transactions/{id}/signature_positions')
      * @Response(200, {positions})
      * @param $id Integer identifier of the transaction
-     * @return \Dingo\Api\Http\Response
+     * @return array
      */
     public function signaturePositions($id) {
 
@@ -113,6 +113,9 @@ class TransactionsController extends AuthController
             return $this->response->errorForbidden("User does not have permissions to access this transaction");
         }
 
-        return $this->response->accepted();
+        $positions = [random_int(1, 8), random_int(1, 8), random_int(1, 8), random_int(1, 8)];
+        sort($positions);
+        return ['positions'     => array_unique($positions, SORT_NUMERIC),
+            'signatureLength'   => 8];
     }
 }
