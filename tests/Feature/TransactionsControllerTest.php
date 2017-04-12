@@ -637,4 +637,16 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $result->seeStatusCode(200)
             ->seeJsonStructure(['ticket']);
     }
+
+    /**
+     * @test
+     * Cannot confirm SMS if user is not authorized
+     */
+    public function given_noAuthorization_When_confirmOtpSMS_Then_Returns401() {
+
+        $result = $this->post('/api/transactions/50/signature_confirmation', []);
+
+        // Assert
+        $result->seeStatusCode(401);
+    }
 }
