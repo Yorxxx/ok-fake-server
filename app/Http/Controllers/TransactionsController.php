@@ -94,4 +94,25 @@ class TransactionsController extends AuthController
 
         return $this->response->errorInternal();
     }
+
+    /**
+     * Returns the positions from the given transaction
+     * @GET('/api/transactions/{id}/signature_positions')
+     * @Response(200, {positions})
+     * @param $id Integer identifier of the transaction
+     * @return \Dingo\Api\Http\Response
+     */
+    public function signaturePositions($id) {
+
+        $current_user = $this->getUserFromToken();
+        $transaction = Transaction::where('id', $id)->first();
+        if ($transaction == null) {
+            return $this->response->errorNotFound("Transaction does not exist");
+        }
+        if (strcmp($current_user->id, $transaction->user_id) != 0) {
+            return $this->response->errorForbidden("User does not have permissions to access this transaction");
+        }
+
+        return $this->response->accepted();
+    }
 }

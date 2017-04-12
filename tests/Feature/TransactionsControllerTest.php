@@ -505,4 +505,44 @@ class TransactionsControllerTest extends BrowserKitTestCase
         // Assert
         $result->seeStatusCode(401);
     }
+
+    /**
+     * @test
+     * Cannot return positions from non-existing transactions
+     */
+    public function given_nonExistingTransaction_When_GetPositions_Then_Returns404() {
+
+        $user = factory(\App\User::class)->create();
+        $agent = factory(Agent::class)->create();
+        $transaction = factory(\App\Transaction::class)->create([
+           'user_id'                => $user->id,
+            'agent_destination'     => $agent->id
+        ]);
+
+        $result = $this->get('/api/transactions/50/signature_positions', $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(404)
+            ->seeText("Transaction does not exist");
+    }
+
+    /**
+     * @test
+     * Trying to get signature positions from transactions not performed by current user is not allowed
+     */
+    public function given_transactionNotPerformedByCurrentUser_When_GetPositions_Then_Returns403() {
+        $current_user = factory(\App\User::class)->create();
+        $user = factory(\App\User::class)->create();
+        $agent = factory(Agent::class)->create();
+        $transaction = factory(\App\Transaction::class)->create([
+            'user_id'                => $user->id,
+            'agent_destination'     => $agent->id
+        ]);
+
+        $result = $this->get('/api/transactions/' . $transaction->id . ' /signature_positions', $this->headers($current_user));
+
+        // Assert
+        $result->seeStatusCode(403)
+            ->seeText("User does not have permissions to access this transaction");
+    }
 }
