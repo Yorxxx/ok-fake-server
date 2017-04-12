@@ -493,4 +493,16 @@ class TransactionsControllerTest extends BrowserKitTestCase
         self::assertFalse($updated_account->amount == $account->amount);
         self::assertEquals($updated_account->amount, $account->amount-50);
     }
+
+    /**
+     * @test
+     * Cannot retrieve transaction positions without authorization
+     */
+    public function given_noAuthorization_When_GetPositions_Then_Returns401() {
+
+        $result = $this->get('/api/transactions/50/signature_positions');
+
+        // Assert
+        $result->seeStatusCode(401);
+    }
 }
