@@ -120,9 +120,9 @@ class AgentControllerTest extends BrowserKitTestCase
     /**
      * @test
      * @POST('/api/agents)
-     * Trying to add an agent with missing required params (like account or name), should throw a bad request error
+     * Trying to add an agent with missing required params "name", should throw a bad request error
      */
-    public function given_missingRequiredParams_When_store_Then_Returns400() {
+    public function given_missingNameParams_When_store_Then_Returns400() {
 
         // Arrange
         $user = factory(App\User::class)->create([
@@ -133,6 +133,7 @@ class AgentControllerTest extends BrowserKitTestCase
 
         // Act
         $result = $this->post('/api/agents', [
+            'account'   => 'foo',
             'owner'     => false,
             'phone'     => 665547878,
             'prefix'    => 34,
@@ -140,7 +141,64 @@ class AgentControllerTest extends BrowserKitTestCase
             'country'   => 'ES'], $this->headers($user));
 
         // Assert
-        $result->seeStatusCode(400);
+        $result->seeStatusCode(400)
+            ->seeText("The name field is required.");
+    }
+
+    /**
+     * @test
+     * @POST('/api/agents)
+     * Trying to add an agent with missing required params "account", should throw a bad request error
+     */
+    public function given_missingAccountParam_When_store_Then_Returns400() {
+
+        // Arrange
+        $user = factory(App\User::class)->create([
+            'document' => '123456789',
+            'doctype' => 'N',
+            'password' => bcrypt('foo')]);
+
+
+        // Act
+        $result = $this->post('/api/agents', [
+            'name'   => 'foo',
+            'owner'     => false,
+            'phone'     => 665547878,
+            'prefix'    => 34,
+            'email'     => '',
+            'country'   => 'ES'], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(400)
+            ->seeText("The account field is required.");
+    }
+
+    /**
+     * @test
+     * @POST('/api/agents)
+     * Trying to add an agent with missing required params "phone", should throw a bad request error
+     */
+    public function given_missingPhoneParam_When_store_Then_Returns400() {
+
+        // Arrange
+        $user = factory(App\User::class)->create([
+            'document' => '123456789',
+            'doctype' => 'N',
+            'password' => bcrypt('foo')]);
+
+
+        // Act
+        $result = $this->post('/api/agents', [
+            'name'   => 'foo',
+            'account'   => 'foo',
+            'owner'     => false,
+            'prefix'    => 34,
+            'email'     => '',
+            'country'   => 'ES'], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(400)
+            ->seeText("The phone field is required.");
     }
 
     /**
@@ -197,7 +255,7 @@ class AgentControllerTest extends BrowserKitTestCase
 
         $this->post('/api/accounts/by_number', ['foo'   => $account->number], $this->headers($user))
             ->seeStatusCode(400)
-            ->seeText("Missing or invalid param: account");
+            ->seeText("The account field is required");
     }
 
     /**
