@@ -16,10 +16,22 @@ class TransactionsController extends AuthController
 {
     /**
      * Returns the transactions for the current user
+     * TODO just for faking purposes, pending transactions created more than 24h ago are updated to confirmed. This should be faked in another way, like a cron job.
      * @GET('/api/transactions')
      * @Response(200, $transactions)
      */
     public function getTransactions() {
+        $data = $this->getUserFromToken()->transactions;
+
+        foreach ($data as $transaction) {
+            if ($transaction->state == 5) {
+                $filter = Carbon::yesterday();
+                if ($filter->gt($transaction->date_creation)) {
+                    $transaction->state = 3;
+                    $transaction->save();
+                }
+            }
+        }
         $data = $this->getUserFromToken()->transactions;
         return $this->collection($data, new TransactionsTranformer, ['key' => 'results']);
     }
@@ -176,6 +188,8 @@ class TransactionsController extends AuthController
         if (strcmp($current_user->id, $transaction->user_id) != 0) {
             return $this->response->errorForbidden("User does not have permissions to access this transaction");
         }
+        $transaction->state = 5;
+        $transaction->save();
 
         return;
     }
