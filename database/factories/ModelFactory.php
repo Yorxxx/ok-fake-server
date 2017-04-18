@@ -31,7 +31,7 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
 $factory->define(App\Account::class, function (Faker\Generator $faker) {
 
     return [
-        'number' => $faker->unique()->bankAccountNumber,
+        'number' => $faker->iban('ES') . $faker->unique()->bankAccountNumber,
         'alias' => $faker->word,
         'linked' => random_int(0, 1),
         'currency' => 'EUR',
