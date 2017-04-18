@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Requests;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Mockery\Exception;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use JWTAuth;
 
@@ -21,26 +25,31 @@ class AuthenticateController extends AuthController
      */
     public function authenticate(Request $request) {
 
-        if (!$request->has('document') || !$request->has('doctype')) {
-            return $this->response->errorBadRequest();
-        }
-        $doctype = $request->get('doctype');
-        if ($doctype !== "N" && $doctype !== "P") {
-            return $this->response->errorBadRequest("Unsupported doctype");
-        }
-
-        $credentials = ['document' => $request->get('document'), 'password' => $request->get('password'), 'doctype' => $request->get('doctype')];
         try {
-            // attempt to verify the credentials and create a token for the user
-            if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json(['error' => 'invalid_credentials'], 401);
+            $rules = [
+                'document' => 'required',
+                'doctype' => 'required|In:P,N',
+                'password' => 'required|Size:4'
+            ];
+
+            $v = Validator::make($request->all(), $rules);
+            if ($v->fails()) {
+                throw new BadRequestHttpException($v->getMessageBag()->first());
             }
-        } catch (JWTException $e) {
-            // something went wrong whilst attempting to encode the token
-            return response()->json(['error' => 'could_not_create_token'], 500);
+
+            /*$credentials = ['document' => $request->get('document'), 'password' => $request->get('password'), 'doctype' => $request->get('doctype')];*/
+            $credentials = $request->all();
+            if (!$token = JWTAuth::attempt($credentials))
+                throw new AuthenticationException();
+
+            return response()->json(compact('token'));
+        } catch (BadRequestHttpException $e) {
+            return $this->response->errorBadRequest($e->getMessage());
+        } catch (AuthenticationException $e) {
+            return $this->response->errorUnauthorized('Invalid credentials');
+        } catch (Exception $e) {
+            return $this->response->errorInternal("Could not create token");
         }
-        // all good so return the token
-        return response()->json(compact('token'));
     }
 
     /**

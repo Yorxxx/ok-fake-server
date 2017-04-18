@@ -20,7 +20,8 @@ class UserControllerTest extends BrowserKitTestCase
     public function given_missingdocument_when_authenticate_Then_Returns400() {
 
         $this->post('/api/authenticate', ['password' => 'foo', 'doctype' => 'P'])
-            ->seeStatusCode(400);
+            ->seeStatusCode(400)
+            ->seeText("The document field is required");
     }
 
     /**
@@ -32,7 +33,55 @@ class UserControllerTest extends BrowserKitTestCase
     public function given_missingdoctype_when_authenticate_Then_Returns400() {
 
         $this->post('/api/authenticate', ['document' => 'document', 'password' => 'foo'])
-            ->seeStatusCode(400);
+            ->seeStatusCode(400)
+            ->seeText("The doctype field is required");
+    }
+
+    /**
+     * @test
+     *
+     * @POST /api/authenticate
+     * Authenticating without password throws error
+     */
+    public function given_missingpassword_when_authenticate_Then_Returns400() {
+
+        $this->post('/api/authenticate', ['document' => 'document', 'doctype' => 'P'])
+            ->seeStatusCode(400)
+            ->seeText("The password field is required");
+    }
+
+    /**
+     * @test
+     * Test: POST /api/authenticate
+     * Authenticating with an invalid doctype, throws an Error
+     */
+    public function given_unsupportedDocType_When_authenticate_Then_Returns400() {
+        $this->post('/api/authenticate', ['document' => "foo", 'password' => 'foo', 'doctype' => 'A'])
+            ->seeStatusCode(400)
+            ->seeText("The selected doctype is invalid.");
+    }
+
+
+    /**
+     * @test
+     * @POST ('/api/authenticate')
+     * Authenticating with non existing user throws an error
+     */
+    public function given_nonExistingUser_when_authenticate_Then_Returns401() {
+        $this->post('/api/authenticate', ['document' => "foo", 'password' => '5780', 'doctype' => 'P'])
+            ->seeStatusCode(401)
+            ->seeText("Invalid credentials");
+    }
+
+    /**
+     * @test
+     * @POST ('/api/authenticate')
+     * Authenticating with an invalid password length, should throw an error
+     */
+    public function given_invalidPassword_when_authenticate_Then_Returns400() {
+        $this->post('/api/authenticate', ['document' => "foo", 'password' => 'foo', 'doctype' => 'P'])
+            ->seeStatusCode(400)
+            ->seeText("The password must be 4 characters.");
     }
 
     /**
@@ -46,36 +95,14 @@ class UserControllerTest extends BrowserKitTestCase
         factory(App\User::class)->create([
             'document' => '123456789',
             'doctype' => 'N',
-            'password' => bcrypt('foo')]
+            'password' => bcrypt('1111')]
         );
 
         $this->post('/api/authenticate', [
             'document' => '123456789',
-            'password' => 'foo',
+            'password' => '1111',
             'doctype' => 'N'])
             ->seeJsonStructure(['token']);
-    }
-
-    /**
-     * @test
-     * Test: POST /api/authenticate
-     * Authenticating with non existing user throws an error
-     */
-    public function given_nonExistingUser_when_authenticate_Then_Returns401() {
-        $this->post('/api/authenticate', ['document' => "foo", 'password' => 'foo', 'doctype' => 'P'])
-            ->seeStatusCode(401)
-            ->seeText("invalid_credentials");
-    }
-
-    /**
-     * @test
-     * Test: POST /api/authenticate
-     * Authenticating with an invalid doctype, throws an Error
-     */
-    public function given_unsupportedDocType_When_authenticate_Then_Returns400() {
-        $this->post('/api/authenticate', ['document' => "foo", 'password' => 'foo', 'doctype' => 'A'])
-            ->seeStatusCode(400)
-            ->seeText("Unsupported doctype");
     }
 
     /**
