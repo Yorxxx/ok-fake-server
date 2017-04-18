@@ -283,7 +283,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         // Assert
         $result->seeStatusCode(403)
-            ->seeText("Forbidden");
+            ->seeText("Current user should match emisor");
     }
 
     /**
@@ -432,7 +432,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         // Assert
         $result->seeStatusCode(400)
-            ->seeText("The amount estimated must be at least 1\\\Max:499.");
+            ->seeText("The amount estimated must be at least 1");
     }
 
     /**

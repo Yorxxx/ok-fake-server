@@ -71,7 +71,7 @@ class TransactionsController extends AuthController
                 'emisor_account'        => 'required',
                 'agent_destination'     => 'required',
                 'amount'                => 'Numeric|Min:1|Max:499',
-                'amount_estimated'      => 'Numeric|Min:1\Max:499',
+                'amount_estimated'      => 'Numeric|Min:1|Max:499',
                 'currency_source'       => 'required|In:EUR,GBP',
                 'currency_destination'  => 'required|In:EUR,GBP'
             ];
