@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Agent;
 use App\Transformers\AgentsTranformer;
 use Dingo\Api\Routing\Helpers;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use JWTAuth;
 use Exception;
 
@@ -30,8 +32,9 @@ class AgentsController extends AuthController
      * @return \Dingo\Api\Http\Response
      */
     public function store(Request $request) {
-        $user = $this->getUserFromToken();
         try {
+            $user = $this->getUserFromToken();
+
             $this->validate($request, [
                 'account'   => 'required|max:255',
                 'name'      => 'required',
@@ -42,12 +45,45 @@ class AgentsController extends AuthController
 
             $transformer = new AgentsTranformer;
 
-            if ($agent = Agent::create($transformer->mapFromRequest($values))) {
-                return $this->response->item($agent, new AgentsTranformer);
-            }
-        } catch (Exception $e) {
+            return $this->response->item(Agent::create($transformer->mapFromRequest($values)), new AgentsTranformer);
+        } catch (ValidationException $e) {
             return $this->response->errorBadRequest();
+        } catch(Exception $e) {
+            return $this->response()->errorInternal();
         }
-        return $this->response->errorBadRequest();
+    }
+
+    /**
+     * Shows an account by its number
+     * @param Request $request
+     * @POST('/api/accounts/by_number')
+     * @Request({account="foo"})
+     */
+    public function show(Request $request) {
+
+        try {
+            $user = $this->getUserFromToken();
+
+            $this->validate($request, [
+                'account' => 'required|max:255'
+            ]);
+            $agent = Agent::where('account', $request->get('account'))
+                ->where('user_id', $user->id)
+                ->first();
+            if (!$agent) {
+                throw new ModelNotFoundException();
+            }
+            return $this->item($agent, new AgentsTranformer);
+
+        } catch(ValidationException $e) {
+            return $this->response()->errorBadRequest("Missing or invalid param: account");
+        } catch (ModelNotFoundException $e) {
+            return $this->response()->errorNotFound();
+        }
+        // @codeCoverageIgnoreStart
+        catch(Exception $e) {
+            return $this->response()->errorInternal();
+        }
+        // @codeCoverageIgnoreEnd
     }
 }

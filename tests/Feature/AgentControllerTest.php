@@ -73,7 +73,7 @@ class AgentControllerTest extends BrowserKitTestCase
      * POST /api/agents
      * Adding new agents when not authorized should be forbidden
      */
-    public function given_unauthorizedUser_When_AddAgent_Then_Returns401() {
+    public function given_unauthorizedUser_When_store_Then_Returns401() {
 
         $this->post('/api/agents', [
             'owner'     => false,
@@ -91,7 +91,7 @@ class AgentControllerTest extends BrowserKitTestCase
      * @POST('/api/agents')
      * Authorized users are allowed to add new agents
      */
-    public function given_authorizedUser_When_AddAgent_Then_Returns202() {
+    public function given_authorizedUser_When_store_Then_Returns202() {
 
         // Arrange
         $user = factory(App\User::class)->create([
@@ -141,5 +141,108 @@ class AgentControllerTest extends BrowserKitTestCase
 
         // Assert
         $result->seeStatusCode(400);
+    }
+
+    /**
+     * @test
+     * @POST('/api/agents')
+     * If a mapping error, then return 500
+     */
+    public function given_mapError_When_store_Then_Returns500() {
+
+        // Arrange
+        $user = factory(App\User::class)->create([
+            'document' => '123456789',
+            'doctype' => 'N',
+            'password' => bcrypt('foo')]);
+
+
+        // Act
+        $result = $this->post('/api/agents', [
+            'owner'     => false,
+            'name'      => 'Foo Bar',
+            'phone'     => 665547878,
+            'account'   => "ES1521002719380200073017",
+            'email'     => '',
+            'country'   => 'ES'], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(500);
+    }
+
+    /**
+     * @test
+     * @POST('/api/accounts/by_number')
+     * @Request({"account": "foo"})
+     * Not logged in users should not be able to retrieve accounts info by number
+     */
+    public function given_unauthorizedUser_When_getAccountByNumber_Then_Returns400() {
+        $this->post('/api/accounts/by_number', [])
+            ->seeStatusCode(401);
+    }
+
+    /**
+     * @test
+     * @POST('/api/accounts/by_number')
+     * @Request({"account": "foo"})
+     * Invalid requests payload return a bad request code
+     */
+    public function given_invalidRequest_When_getAccountByNumber_Then_ReturnsBadRequest() {
+
+        $user = factory(App\User::class)->create();
+        $account = factory(App\Agent::class)->create([
+            'account'           => "foo",
+            'user_id'           => $user->id
+        ]);
+
+        $this->post('/api/accounts/by_number', ['foo'   => $account->number], $this->headers($user))
+            ->seeStatusCode(400)
+            ->seeText("Missing or invalid param: account");
+    }
+
+    /**
+     * @test
+     * @POST('/api/accounts/by_number')
+     * @Request({"account": "foo"})
+     * If the account does not exist for the given user, return 404
+     */
+    public function given_authorizedUserAskingForNonExistingAccount_When_getAccountByNumber_Then_Returns404() {
+
+        // Arrange
+        $currentuser = factory(App\User::class)->create();
+
+        // Create an account for another user. We will request it
+        $user = factory(App\User::class)->create();
+        factory(App\Agent::class)->create([
+            'account'           => "foo",
+            'user_id'           => $user->id
+        ]);
+
+        $this->post('/api/accounts/by_number', ['account'   => "bla"], $this->headers($currentuser))
+            ->seeStatusCode(404);
+    }
+
+    /**
+     * @test
+     * @POST('/api/accounts/by_number')
+     * @Request({"account": "foo"})
+     * Asking for an existing account, should return its info
+     */
+    public function given_existingAccount_When_getAccountByNumber_Then_ReturnsAccount() {
+
+        // Arrange
+        $user = factory(App\User::class)->create();
+        factory(App\Agent::class)->create([
+            'account'           => "foo",
+            'user_id'           => $user->id
+        ]);
+
+        // Act
+        $result = $this->post('/api/accounts/by_number', ['account'   => "foo"], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(200)
+            ->seeJsonStructure([
+                'id', 'account', 'owner', 'name', 'email', 'country', 'prefix', 'phone', 'user_id']);
     }
 }
