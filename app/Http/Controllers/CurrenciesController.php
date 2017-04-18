@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Dingo\Api\Routing\Helpers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class CurrenciesController extends Controller
 {
@@ -17,29 +19,32 @@ class CurrenciesController extends Controller
      */
     public function getCurrency(Request $request) {
 
-        if (!$request->has('currency_destination') || !$request->has('currency_source')) {
-            return $this->response->errorBadRequest("Missing required params");
-        }
+        try {
 
-        $allowed_currencies = ["EUR", "GBP"];
+            $rules = [
+                'currency_destination'  => 'required|In:EUR,GBP',
+                'currency_source'  => 'required|In:EUR,GBP'
+            ];
 
-        $dest = $request->get('currency_destination');
-        if (!in_array($dest, $allowed_currencies)) {
-            return $this->response->errorBadRequest("Unknown currency " . $dest);
-        }
+            $v = Validator::make($request->all(), $rules);
+            if ($v->fails()) {
+                throw new BadRequestHttpException($v->getMessageBag()->first());
+            }
 
-        $source = $request->get('currency_source');
-        if (!in_array($source, $allowed_currencies)) {
-            return $this->response->errorBadRequest("Unknown currency " . $source);
-        }
+            $dest = $request->get('currency_destination');
+            $source = $request->get('currency_source');
 
-        if (strcmp($source, "EUR") == 0 && strcmp($dest, "GBP") == 0) {
-            return "0.85";
-        }
-        if (strcmp($source, "GBP") == 0 && strcmp($dest, "EUR") == 0) {
-            return "1.17";
-        }
+            if (strcmp($source, "EUR") == 0 && strcmp($dest, "GBP") == 0) {
+                return "0.85";
+            }
+            if (strcmp($source, "GBP") == 0 && strcmp($dest, "EUR") == 0) {
+                return "1.17";
+            }
 
-        return "1";
+            return "1";
+
+        } catch (BadRequestHttpException $e) {
+            return $this->response->errorBadRequest($e->getMessage());
+        }
     }
 }

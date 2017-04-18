@@ -7,9 +7,11 @@ use App\Transformers\AgentsTranformer;
 use Dingo\Api\Routing\Helpers;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use JWTAuth;
 use Exception;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class AgentsController extends AuthController
 {
@@ -35,21 +37,28 @@ class AgentsController extends AuthController
         try {
             $user = $this->getUserFromToken();
 
-            $this->validate($request, [
+            $rules = [
                 'account'   => 'required|max:255',
                 'name'      => 'required',
                 'phone'     => 'required'
-            ]);
+            ];
+
+            $v = Validator::make($request->all(), $rules);
+            if ($v->fails()) {
+                throw new BadRequestHttpException($v->getMessageBag()->first());
+            }
+
             $values = $request->all();
+
             $values['user_id'] = $user->id;
 
             $transformer = new AgentsTranformer;
 
             return $this->response->item(Agent::create($transformer->mapFromRequest($values)), new AgentsTranformer);
-        } catch (ValidationException $e) {
-            return $this->response->errorBadRequest();
+        } catch (BadRequestHttpException $e) {
+            return $this->response->errorBadRequest($e->getMessage());
         } catch(Exception $e) {
-            return $this->response()->errorInternal();
+            return $this->response()->errorInternal($e->getMessage());
         }
     }
 
@@ -64,9 +73,14 @@ class AgentsController extends AuthController
         try {
             $user = $this->getUserFromToken();
 
-            $this->validate($request, [
-                'account' => 'required|max:255'
-            ]);
+            $rules = [
+                'account'   => 'required|max:255',
+            ];
+
+            $v = Validator::make($request->all(), $rules);
+            if ($v->fails()) {
+                throw new BadRequestHttpException($v->getMessageBag()->first());
+            }
             $agent = Agent::where('account', $request->get('account'))
                 ->where('user_id', $user->id)
                 ->first();
@@ -75,10 +89,10 @@ class AgentsController extends AuthController
             }
             return $this->item($agent, new AgentsTranformer);
 
-        } catch(ValidationException $e) {
-            return $this->response()->errorBadRequest("Missing or invalid param: account");
+        } catch(BadRequestHttpException $e) {
+            return $this->response()->errorBadRequest($e->getMessage());
         } catch (ModelNotFoundException $e) {
-            return $this->response()->errorNotFound();
+            return $this->response()->errorNotFound($e->getMessage());
         }
         // @codeCoverageIgnoreStart
         catch(Exception $e) {
