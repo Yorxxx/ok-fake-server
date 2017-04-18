@@ -37,7 +37,6 @@ class AuthenticateController extends AuthController
                 throw new BadRequestHttpException($v->getMessageBag()->first());
             }
 
-            /*$credentials = ['document' => $request->get('document'), 'password' => $request->get('password'), 'doctype' => $request->get('doctype')];*/
             $credentials = $request->all();
             if (!$token = JWTAuth::attempt($credentials))
                 throw new AuthenticationException();
@@ -48,7 +47,9 @@ class AuthenticateController extends AuthController
         } catch (AuthenticationException $e) {
             return $this->response->errorUnauthorized('Invalid credentials');
         } catch (Exception $e) {
+            //@codeCoverageIgnoreStart
             return $this->response->errorInternal("Could not create token");
+            //@codeCoverageIgnoreEnd
         }
     }
 
