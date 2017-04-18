@@ -401,7 +401,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         // Assert
         $result->seeStatusCode(400)
-            ->seeText("Bad Request");
+            ->seeText("The amount must be at least 1.");
     }
 
     /**
@@ -432,7 +432,38 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         // Assert
         $result->seeStatusCode(400)
-            ->seeText("Bad Request");
+            ->seeText("The amount estimated must be at least 1\\\Max:499.");
+    }
+
+    /**
+     * @test
+     * @POST('/api/transactions/')
+     * Trying to send amounts above of 500 is not supported
+     */
+    public function given_moreThan500UnitsAmount_When_Store_Then_Returns405() {
+        // Arrange
+        $user = factory(App\User::class)->create();
+        $account = factory(\App\Account::class)->create([
+            'user_id'   => $user->id
+        ]);
+        $agent = factory(App\Agent::class)->create([
+            'user_id'   => $user->id
+        ]);
+
+        // Act
+        $result = $this->post('/api/transactions/', [
+            'emisor_account'            => $account->id,
+            'agent_destination'         => $agent->id,
+            'concept'                   => 'foo',
+            'amount'                    => 4200,
+            'amount_estimated'          => "4200.5",
+            'currency_source'           => 'EUR',
+            'currency_destination'      => 'EUR'
+        ], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(400)
+            ->seeText("The amount may not be greater than 499.");
     }
 
     /**
@@ -456,14 +487,14 @@ class TransactionsControllerTest extends BrowserKitTestCase
             'agent_destination'         => $agent->id,
             'concept'                   => 'foo',
             'amount'                    => 50,
-            'amount_estimated'          => "-42.5",
+            'amount_estimated'          => "42.5",
             'currency_source'           => 'USD',
             'currency_destination'      => 'EUR'
         ], $this->headers($user));
 
         // Assert
         $result->seeStatusCode(400)
-            ->seeText("Bad Request");
+            ->seeText("The selected currency source is invalid");
     }
 
     /**
@@ -487,14 +518,14 @@ class TransactionsControllerTest extends BrowserKitTestCase
             'agent_destination'         => $agent->id,
             'concept'                   => 'foo',
             'amount'                    => 50,
-            'amount_estimated'          => "-42.5",
+            'amount_estimated'          => "42.5",
             'currency_source'           => 'EUR',
             'currency_destination'      => 'USD'
         ], $this->headers($user));
 
         // Assert
         $result->seeStatusCode(400)
-            ->seeText("Bad Request");
+            ->seeText("The selected currency destination is invalid");
     }
 
     /**
