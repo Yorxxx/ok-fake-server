@@ -32,8 +32,9 @@ class AgentsController extends AuthController
      * @return \Dingo\Api\Http\Response
      */
     public function store(Request $request) {
-        $user = $this->getUserFromToken();
         try {
+            $user = $this->getUserFromToken();
+
             $this->validate($request, [
                 'account'   => 'required|max:255',
                 'name'      => 'required',
@@ -44,13 +45,12 @@ class AgentsController extends AuthController
 
             $transformer = new AgentsTranformer;
 
-            if ($agent = Agent::create($transformer->mapFromRequest($values))) {
-                return $this->response->item($agent, new AgentsTranformer);
-            }
-        } catch (Exception $e) {
+            return $this->response->item(Agent::create($transformer->mapFromRequest($values)), new AgentsTranformer);
+        } catch (ValidationException $e) {
             return $this->response->errorBadRequest();
+        } catch(Exception $e) {
+            return $this->response()->errorInternal();
         }
-        return $this->response->errorBadRequest();
     }
 
     /**
@@ -61,9 +61,9 @@ class AgentsController extends AuthController
      */
     public function show(Request $request) {
 
-        $user = $this->getUserFromToken();
-
         try {
+            $user = $this->getUserFromToken();
+
             $this->validate($request, [
                 'account' => 'required|max:255'
             ]);
@@ -79,8 +79,11 @@ class AgentsController extends AuthController
             return $this->response()->errorBadRequest("Missing or invalid param: account");
         } catch (ModelNotFoundException $e) {
             return $this->response()->errorNotFound();
-        } catch(Exception $e) {
+        }
+        // @codeCoverageIgnoreStart
+        catch(Exception $e) {
             return $this->response()->errorInternal();
         }
+        // @codeCoverageIgnoreEnd
     }
 }

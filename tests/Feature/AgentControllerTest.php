@@ -73,7 +73,7 @@ class AgentControllerTest extends BrowserKitTestCase
      * POST /api/agents
      * Adding new agents when not authorized should be forbidden
      */
-    public function given_unauthorizedUser_When_AddAgent_Then_Returns401() {
+    public function given_unauthorizedUser_When_store_Then_Returns401() {
 
         $this->post('/api/agents', [
             'owner'     => false,
@@ -91,7 +91,7 @@ class AgentControllerTest extends BrowserKitTestCase
      * @POST('/api/agents')
      * Authorized users are allowed to add new agents
      */
-    public function given_authorizedUser_When_AddAgent_Then_Returns202() {
+    public function given_authorizedUser_When_store_Then_Returns202() {
 
         // Arrange
         $user = factory(App\User::class)->create([
@@ -141,6 +141,33 @@ class AgentControllerTest extends BrowserKitTestCase
 
         // Assert
         $result->seeStatusCode(400);
+    }
+
+    /**
+     * @test
+     * @POST('/api/agents')
+     * If a mapping error, then return 500
+     */
+    public function given_mapError_When_store_Then_Returns500() {
+
+        // Arrange
+        $user = factory(App\User::class)->create([
+            'document' => '123456789',
+            'doctype' => 'N',
+            'password' => bcrypt('foo')]);
+
+
+        // Act
+        $result = $this->post('/api/agents', [
+            'owner'     => false,
+            'name'      => 'Foo Bar',
+            'phone'     => 665547878,
+            'account'   => "ES1521002719380200073017",
+            'email'     => '',
+            'country'   => 'ES'], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(500);
     }
 
     /**
