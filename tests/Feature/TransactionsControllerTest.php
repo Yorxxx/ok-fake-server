@@ -705,5 +705,8 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         // Assert
         $result->seeStatusCode(200);
+        $updated_transaction = \App\Transaction::where('id', $transaction->id)->first();
+        self::assertNotNull($updated_transaction);
+        self::assertEquals(5, $updated_transaction->state);
     }
 }

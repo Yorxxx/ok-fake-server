@@ -176,6 +176,8 @@ class TransactionsController extends AuthController
         if (strcmp($current_user->id, $transaction->user_id) != 0) {
             return $this->response->errorForbidden("User does not have permissions to access this transaction");
         }
+        $transaction->state = 5;
+        $transaction->save();
 
         return;
     }
