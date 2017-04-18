@@ -10,6 +10,12 @@ use Carbon\Carbon;
 use Dingo\Api\Http\Request;
 use Dingo\Api\Routing\Helpers;
 use Exception;
+use Illuminate\Contracts\Queue\EntityNotFoundException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\UnauthorizedException;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 
 class TransactionsController extends AuthController
@@ -61,50 +67,60 @@ class TransactionsController extends AuthController
      */
     public function store(Request $request) {
         try {
-            $this->validate($request, [
+            $rules = [
                 'emisor_account'        => 'required',
                 'agent_destination'     => 'required',
-                'amount'                => 'Numeric|Min:1',
-                'amount_estimated'      => 'Numeric|Min:1',
+                'amount'                => 'Numeric|Min:1|Max:499',
+                'amount_estimated'      => 'Numeric|Min:1|Max:499',
                 'currency_source'       => 'required|In:EUR,GBP',
                 'currency_destination'  => 'required|In:EUR,GBP'
-            ]);
+            ];
+            $v = Validator::make($request->all(), $rules);
+            if ($v->fails()) {
+                throw new BadRequestHttpException($v->getMessageBag()->first());
+            }
 
             $current_user = $this->getUserFromToken();
 
-        } catch (Exception $e) {
-            return $this->response->errorBadRequest();
-        }
-        $emisor = Account::where('id', $request['emisor_account'])->first();
-        if ($emisor == null) {
-            return $this->response->errorNotFound('This account does not exist');
-        }
-        if (strcmp($current_user->id, $emisor->user_id) != 0) {
-            return $this->response->errorForbidden();
-        }
-        $agent_dest = Agent::where('id', $request['agent_destination'])->first();
-        if ($agent_dest == null) {
-            return $this->response->errorNotFound('This agent does not exist');
-        }
-
-        if (strcmp($emisor->number, $agent_dest->account) == 0) {
-            return $this->response->errorForbidden("Destination account cannot be the same as emisor account");
-        }
-
-        $transformer = new TransactionsTranformer;
-        $values = $transformer->mapFromRequest($request->all());
-        $values['user_id'] = $current_user->id;
-        $values['date_start'] = Carbon::now();
-        $values['date_creation'] = Carbon::now();
-        $values['date_end'] = Carbon::now()->addDays(7);
-        if ($transaction = Transaction::create($values)) {
-            $emisor->amount-=$request['amount'];
-            $emisor->save();
-            return $this->response->item($transaction, $transformer);
-        }
+            $emisor = Account::where('id', $request['emisor_account'])->first();
+            if ($emisor == null) {
+                throw new ModelNotFoundException('This account does not exist');
+            }
+            if (strcmp($current_user->id, $emisor->user_id) != 0) {
+                throw new UnauthorizedException("Current user should match emisor");
+            }
+            $agent_dest = Agent::where('id', $request['agent_destination'])->first();
+            if ($agent_dest == null) {
+                throw new ModelNotFoundException('This agent does not exist');
+            }
+            if (strcmp($emisor->number, $agent_dest->account) == 0) {
+                throw new UnauthorizedException("Destination account cannot be the same as emisor account");
+            }
 
 
-        return $this->response->errorInternal();
+            $transformer = new TransactionsTranformer;
+            $values = $transformer->mapFromRequest($request->all());
+            $values['user_id'] = $current_user->id;
+            $values['date_start'] = Carbon::now();
+            $values['date_creation'] = Carbon::now();
+            $values['date_end'] = Carbon::now()->addDays(7);
+            if ($transaction = Transaction::create($values)) {
+                $emisor->amount-=$request['amount'];
+                $emisor->save();
+                return $this->response->item($transaction, $transformer);
+            }
+
+        } catch (BadRequestHttpException $e) {
+            return $this->response->errorBadRequest($e->getMessage());
+        } catch (ModelNotFoundException $e) {
+            return $this->response->errorNotFound($e->getMessage());
+        } catch (UnauthorizedException $e) {
+            return $this->response->errorForbidden($e->getMessage());
+        } catch( Exception $e) {
+            //@codeCoverageIgnoreStart
+            return $this->response->errorInternal($e->getMessage());
+            //@codeCoverageIgnoreEnd
+        }
     }
 
     /**
