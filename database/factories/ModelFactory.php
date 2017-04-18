@@ -88,8 +88,8 @@ $factory->define(App\Transaction::class, function(\Faker\Generator $faker) {
 
     return [
         'concept' => $faker->name,
-        'amount_source' => $faker->randomFloat(3, 10, 10000),
-        'amount_destination' => $faker->randomFloat(3, 10, 10000),
+        'amount_source' => $faker->randomFloat(3, 10, 500),
+        'amount_destination' => $faker->randomFloat(3, 10, 500),
         'currency_source' => 'EUR',
         'currency_destination' => 'EUR',
         'state' => random_int(0, 8),
