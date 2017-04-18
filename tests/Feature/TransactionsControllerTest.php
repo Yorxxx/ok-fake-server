@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Tests\BrowserKitTestCase;
 use App\Agent;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -60,6 +61,53 @@ class TransactionsControllerTest extends BrowserKitTestCase
                     ]
                 ]
             ]);
+    }
+
+    /**
+     * @test
+     * @GET('/api/transactions')
+     * Requesting user transaction that are in process and were created more than 24 hours ago, automatically updates them
+     * to completed
+     */
+    public function given_inProcessUserTransactions_When_getTransactions_Then_UpdatesStateBasedOnTransactionDate() {
+
+        $user = factory(App\User::class)->create();
+        $dest_agent = factory(App\Agent::class)->create();
+
+        factory(App\Transaction::class)->create([
+            'user_id' => $user->id,
+            'agent_source' => $dest_agent->account,
+            'agent_destination' => $dest_agent->id,
+            'state' => 5,
+            'date_creation' => Carbon::now()
+        ]);
+
+        $completed_transaction = factory(App\Transaction::class)->create([
+            'user_id' => $user->id,
+            'agent_source' => $dest_agent->account,
+            'agent_destination' => $dest_agent->id,
+            'state' => 5,
+            'date_creation' => Carbon::now()->subWeek()
+        ]);
+
+        // Assert
+        $completed_transactions = \App\Transaction::where('state', 3)->get();
+        self::assertEquals(0, $completed_transactions->count());
+
+        $this->get('/api/transactions', $this->headers($user))
+            ->seeStatusCode(200)
+            ->seeJsonStructure([
+                "results" => [
+                    '*' => [
+                        'id', 'date_start', 'date_end', 'date_creation', 'amount_destination', 'amount_estimated',
+                        'state', 'concept', 'currency_destination', 'amount_source', 'currency_source'
+                    ]
+                ]
+            ]);
+
+        $completed_transactions = \App\Transaction::where('state', 3)->get();
+        self::assertEquals(1, $completed_transactions->count());
+        self::assertEquals($completed_transactions->first()->id, $completed_transaction->id);
     }
 
     /**
