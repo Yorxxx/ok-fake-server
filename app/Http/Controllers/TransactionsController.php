@@ -104,6 +104,7 @@ class TransactionsController extends AuthController
             $values['date_start'] = Carbon::now();
             $values['date_creation'] = Carbon::now();
             $values['date_end'] = Carbon::now()->addDays(7);
+            $values['account_source'] = $emisor->id;
             if ($transaction = Transaction::create($values)) {
                 $emisor->amount-=$request['amount'];
                 $emisor->save();

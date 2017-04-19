@@ -44,10 +44,13 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         $user = factory(App\User::class)->create();
         $dest_agent = factory(App\Agent::class)->create();
+        $source_account = factory(\App\Account::class)->create([
+            'user_id'       => $user->id
+        ]);
 
         factory(App\Transaction::class)->create([
-            'user_id' => $user->id,
-            'agent_source' => $dest_agent->account,
+            'user_id'           => $user->id,
+            'account_source'    => $source_account->id,
             'agent_destination' => $dest_agent->id
         ]);
 
@@ -73,10 +76,13 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         $user = factory(App\User::class)->create();
         $dest_agent = factory(App\Agent::class)->create();
+        $source_account = factory(\App\Account::class)->create([
+            'user_id'       => $user->id
+        ]);
 
         factory(App\Transaction::class)->create([
             'user_id' => $user->id,
-            'agent_source' => $dest_agent->account,
+            'account_source'    => $source_account->id,
             'agent_destination' => $dest_agent->id,
             'state' => 5,
             'date_creation' => Carbon::now()
@@ -84,7 +90,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         $completed_transaction = factory(App\Transaction::class)->create([
             'user_id' => $user->id,
-            'agent_source' => $dest_agent->account,
+            'account_source'    => $source_account->id,
             'agent_destination' => $dest_agent->id,
             'state' => 5,
             'date_creation' => Carbon::now()->subWeek()
@@ -122,11 +128,14 @@ class TransactionsControllerTest extends BrowserKitTestCase
         // Arrange
         $source_agent = factory(App\Agent::class)->create();
         $dest_agent = factory(App\Agent::class)->create();
+        $source_account = factory(\App\Account::class)->create([
+            'user_id'       => $user->id
+        ]);
 
         factory(App\Transaction::class)->create([
             'id'                => 10,
             'user_id'           => $user->id,
-            'agent_source'      => $source_agent->id,
+            'account_source'    => $source_account->id,
             'agent_destination' => $dest_agent->id
         ]);
 
@@ -164,13 +173,15 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $currentUser = factory(App\User::class)->create();
 
         $user = factory(App\User::class)->create();
-        $source_agent = factory(App\Agent::class)->create();
+        $source_account = factory(\App\Account::class)->create([
+            'user_id'       => $user->id
+        ]);
         $dest_agent = factory(App\Agent::class)->create();
 
         factory(App\Transaction::class)->create([
             'id'                => 10,
             'user_id'           => $user->id,
-            'agent_source'      => $source_agent->id,
+            'account_source'    => $source_account->id,
             'agent_destination' => $dest_agent->id
         ]);
 
@@ -191,10 +202,13 @@ class TransactionsControllerTest extends BrowserKitTestCase
         // Arrange
         $user = factory(App\User::class)->create();
 
+        $source_account = factory(\App\Account::class)->create([
+            'user_id'       => $user->id
+        ]);
         $dest_agent = factory(App\Agent::class)->create();
         $transaction = factory(App\Transaction::class)->create([
             'user_id'           => $user->id,
-            'agent_source'      => $dest_agent->account,
+            'account_source'    => $source_account->id,
             'agent_destination' => $dest_agent->id
         ]);
 

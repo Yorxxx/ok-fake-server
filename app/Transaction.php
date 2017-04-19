@@ -12,7 +12,7 @@ class Transaction extends Model
      * @var array
      */
     protected $fillable = ['date_creation',  'date_start', 'date_end', 'concept', 'amount_source', 'amount_destination', 'currency_source',
-        'currency_destination', 'state', 'frequency', 'sms_custom_text', 'ticket_otp', 'agent_destination', 'agent_source', 'user_id'];
+        'currency_destination', 'state', 'frequency', 'sms_custom_text', 'ticket_otp', 'agent_destination', 'account_source', 'user_id'];
 
     /**
      * The attributes that are not mass assignable
@@ -50,10 +50,10 @@ class Transaction extends Model
     }
 
     /**
-     * Returns the source agent
+     * Returns the source account
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function source() {
-        return $this->hasOne('App\Agent', 'account', 'agent_source');
+        return $this->hasOne('App\Account', 'id', 'account_source');
     }
 }

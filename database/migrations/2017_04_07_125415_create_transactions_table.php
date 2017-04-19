@@ -25,7 +25,7 @@ class CreateTransactionsTable extends Migration
             $table->string('sms_custom_text')->nullable();
             $table->string('ticket_otp')->nullable();
             $table->integer('agent_destination');
-            $table->integer('agent_source');
+            $table->integer('account_source');
             $table->integer('user_id');
             $table->timestamp('date_creation')->nullable();
             $table->timestamp('date_start')->nullable();

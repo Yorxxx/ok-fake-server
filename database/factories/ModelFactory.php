@@ -10,6 +10,7 @@
 | database. Just tell the factory how a default model should look.
 |
 */
+use App\Account;
 use App\Agent;
 use App\User;
 
@@ -33,7 +34,7 @@ $factory->define(App\Account::class, function (Faker\Generator $faker) {
     return [
         'number' => $faker->iban('ES') . $faker->unique()->bankAccountNumber,
         'alias' => $faker->word,
-        'linked' => random_int(0, 1),
+        'linked' => 1,
         'currency' => 'EUR',
         'amount' => $faker->randomFloat(2, 100, 1000000),
         'enterprise' => $faker->company,
@@ -84,7 +85,7 @@ $factory->define(App\Transaction::class, function(\Faker\Generator $faker) {
 
     $date = $faker->dateTimeThisMonth;
 
-    $source = Agent::inRandomOrder()->first();
+    $source = Account::inRandomOrder()->first();
 
     return [
         'concept' => $faker->name,
@@ -100,8 +101,8 @@ $factory->define(App\Transaction::class, function(\Faker\Generator $faker) {
             $user = Agent::inRandomOrder()->first();
             return $user->id;
         },
-        'agent_source' =>  $source->id,
-        'user_id' =>  $source->user->id,
+        'account_source' =>  $source != null ? $source->id : 0,
+        'user_id' =>  $source != null ? $source->user->id : 0,
         'date_creation' => $date,
         'date_start' => $date->add(date_interval_create_from_date_string('2 days')),
         'date_end' => $date->add(date_interval_create_from_date_string('5 days'))

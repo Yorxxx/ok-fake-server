@@ -44,12 +44,17 @@ class UserTest extends BrowserKitTestCase
         factory(App\Agent::class)->create([
             'user_id'   => $user->id
         ]);
+        $account = factory(\App\Account::class)->create([
+            'user_id'   => $user->id
+        ]);
 
         $transaction = factory(App\Transaction::class)->create([
-            'user_id' => $user->id
+            'user_id'           => $user->id,
+            'account_source'    => $account->id
         ]);
         $transaction2 = factory(App\Transaction::class)->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
+            'account_source'    => $account->id
         ]);
 
         // Act

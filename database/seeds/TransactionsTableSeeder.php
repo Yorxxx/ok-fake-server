@@ -16,16 +16,16 @@ class TransactionsTableSeeder extends Seeder
         Model::unguard();
         DB::table('transactions')->delete();
 
-        // Retrieve all users, and for each one, generate a random amount of transactions
-        $users = User::all();
+        // Retrieve all accounts, and for each one, generate a random amount of transactions
+        $accounts = \App\Account::all();
 
-        foreach ($users as $user) {
-            // For every agent of the user, we add a transaction
+        foreach ($accounts as $account) {
+            $user = $account->user;
             $agents = $user->agents;
             foreach ($agents as $agent) {
                 factory(App\Transaction::class)->create([
                     'user_id'           =>  $user->id,
-                    'agent_source'      =>  $agent->account,
+                    'account_source'    =>  $account->id,
                     'agent_destination' =>  $agent->id
                 ]);
             }
