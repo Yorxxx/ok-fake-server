@@ -83,14 +83,17 @@ $factory->define(App\Agent::class, function(\Faker\Generator $faker) {
 
 $factory->define(App\Transaction::class, function(\Faker\Generator $faker) {
 
-    $date = $faker->dateTimeThisMonth;
+    $passed_days = random_int(5, 365);
+    $date = \Carbon\Carbon::now()->subDay($passed_days);
+    $amount_source = $faker->randomFloat(3, 10, 500);
+    $amount_destination = $amount_source;
 
     $source = Account::inRandomOrder()->first();
 
     return [
         'concept' => $faker->name,
-        'amount_source' => $faker->randomFloat(3, 10, 500),
-        'amount_destination' => $faker->randomFloat(3, 10, 500),
+        'amount_source' => $amount_source,
+        'amount_destination' => $amount_destination,
         'currency_source' => 'EUR',
         'currency_destination' => 'EUR',
         'state' => random_int(0, 8),
@@ -105,6 +108,6 @@ $factory->define(App\Transaction::class, function(\Faker\Generator $faker) {
         'user_id' =>  $source != null ? $source->user->id : 0,
         'date_creation' => $date,
         'date_start' => $date->add(date_interval_create_from_date_string('2 days')),
-        'date_end' => $date->add(date_interval_create_from_date_string('5 days'))
+        'date_end' => $date->add(date_interval_create_from_date_string('3 days'))
     ];
 });
