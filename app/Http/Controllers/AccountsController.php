@@ -83,8 +83,8 @@ class AccountsController extends AuthController
             }
          
             $prefix = $phone = '';
-            if ($account->phone !== null) {
-                $phone_values = explode('-', $agent->phone);
+            if ($account->user->phone !== null) {
+                $phone_values = explode('-', $account->user->phone);
                 $prefix = array_values($phone_values)[0];
                 $phone = array_values($phone_values)[1];
             }
