@@ -36,11 +36,11 @@ $api->version('v1', ['middleware' => 'api.auth'], function ($api) {
     $api->get('accounts', 'App\Http\Controllers\AccountsController@getAccounts');
     $api->post('accounts/{id}/link', 'App\Http\Controllers\AccountsController@link');
     $api->post('accounts/{id}/unlink', 'App\Http\Controllers\AccountsController@unlink');
+    $api->post('accounts/by_number', 'App\Http\Controllers\AccountsController@show');
 
     $api->get('settings', 'App\Http\Controllers\SettingsController@getSettings');
     $api->get('agents', 'App\Http\Controllers\AgentsController@getAgents');
     $api->post('agents', 'App\Http\Controllers\AgentsController@store');
-    $api->post('accounts/by_number', 'App\Http\Controllers\AgentsController@show');
 
     $api->get('transactions', 'App\Http\Controllers\TransactionsController@getTransactions');
     $api->post('transactions', 'App\Http\Controllers\TransactionsController@store');

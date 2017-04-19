@@ -177,4 +177,77 @@ class AccountsControllerTest extends BrowserKitTestCase
         self::assertNotNull($account);
         self::assertFalse((bool)$account->linked);
     }
+
+    /**
+     * @test
+     * @POST('/api/accounts/by_number')
+     * @Request({"account": "foo"})
+     * Not logged in users should not be able to retrieve accounts info by number
+     */
+    public function given_unauthorizedUser_When_getAccountByNumber_Then_Returns400() {
+        $this->post('/api/accounts/by_number', [])
+            ->seeStatusCode(401);
+    }
+
+    /**
+     * @test
+     * @POST('/api/accounts/by_number')
+     * @Request({"account": "foo"})
+     * Invalid requests payload return a bad request code
+     */
+    public function given_invalidRequest_When_getAccountByNumber_Then_ReturnsBadRequest() {
+
+        $user = factory(App\User::class)->create();
+        $account = factory(App\Account::class)->create([
+            'number'            => "foo",
+            'user_id'           => $user->id
+        ]);
+
+        $this->post('/api/accounts/by_number', ['foo'   => $account->number], $this->headers($user))
+            ->seeStatusCode(400)
+            ->seeText("The account field is required");
+    }
+
+    /**
+     * @test
+     * @POST('/api/accounts/by_number')
+     * @Request({"account": "foo"})
+     * If the account does not exist for the given user, return 404
+     */
+    public function given_nonExistingAccount_When_getAccountByNumber_Then_Returns404() {
+
+        // Arrange
+        $user = factory(App\User::class)->create();
+        factory(App\Account::class)->create([
+            'number'            => "foo",
+            'user_id'           => $user->id
+        ]);
+
+        $this->post('/api/accounts/by_number', ['account'   => "bla"], $this->headers($user))
+            ->seeStatusCode(404);
+    }
+
+    /**
+     * @test
+     * @POST('/api/accounts/by_number')
+     * @Request({"account": "foo"})
+     * Asking for an existing account, should return its info
+     */
+    public function given_existingAccount_When_getAccountByNumber_Then_ReturnsAccount() {
+
+        // Arrange
+        $user = factory(App\User::class)->create();
+        factory(App\Account::class)->create([
+            'number'            => "foo",
+            'user_id'           => $user->id
+        ]);
+
+        // Act
+        $result = $this->post('/api/accounts/by_number', ['account'   => "foo"], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(200)
+            ->seeJsonStructure([
+                'id', 'account', 'owner', 'name', 'email', 'country', 'prefix', 'phone', 'user_id']);
+    }
 }
