@@ -17,6 +17,10 @@ class TransactionsTransformerTest extends BrowserKitTestCase
         $transformer = new \App\Transformers\TransactionsTranformer;
 
         $source_user = factory(App\User::class)->create([]);
+        $source_account = factory(\App\Account::class)->create([
+            'user_id'   => $source_user->id,
+            'number'    => "7777"
+        ]);
         $dest_user = factory(App\User::class)->create([]);
 
         $time = new DateTime('now');
@@ -31,7 +35,7 @@ class TransactionsTransformerTest extends BrowserKitTestCase
         ]);
 
         $transaction = factory(App\Transaction::class)->create([
-            'agent_source'          => $dest_agent->account,
+            'account_source'        => $source_account->id,
             'agent_destination'     => $dest_agent->id,
             'user_id'               => $source_user->id,
             'amount_destination'    => 10000,
@@ -93,7 +97,7 @@ class TransactionsTransformerTest extends BrowserKitTestCase
         $result_source_agent = $result['agent_source'];
         self::assertNotNull($result_source_agent);
         self::assertArrayHasKey('account', $result_source_agent);
-        self::assertEquals("5555", $result_source_agent['account']);
+        self::assertEquals("7777", $result_source_agent['account']);
     }
 
     /**

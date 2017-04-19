@@ -20,8 +20,12 @@ class TransactionTest extends BrowserKitTestCase
         $agent = factory(App\Agent::class)->create([
             'user_id'   => $user->id
         ]);
+        $account = factory(\App\Account::class)->create([
+            'user_id'       => $user->id
+        ]);
 
         $transaction = factory(App\Transaction::class)->create([
+            'account_source'    => $account->id,
             'agent_destination' => $agent->id
         ]);
 
@@ -35,18 +39,21 @@ class TransactionTest extends BrowserKitTestCase
 
     /**
      * @test
-     * Given a transaction, should return source agent
+     * Given a transaction, should return source account
      */
-    public function given_transaction_when_source_Then_ReturnsSourceAgent() {
+    public function given_transaction_when_source_Then_ReturnsSourceAccount() {
         $user = factory(App\User::class)->create([]);
 
         $agent = factory(App\Agent::class)->create([
-            'user_id'   => $user->id,
-            'account'   => 'foo'
+            'user_id'   => $user->id
+        ]);
+        $account = factory(\App\Account::class)->create([
+            'user_id'       => $user->id
         ]);
 
         $transaction = factory(App\Transaction::class)->create([
-            'agent_source' => $agent->account
+            'account_source'    => $account->id,
+            'agent_destination' => $agent->id
         ]);
 
         // Act
@@ -54,6 +61,6 @@ class TransactionTest extends BrowserKitTestCase
 
         // Assert
         self::assertNotNull($result);
-        self::assertEquals($agent->id, $result->id);
+        self::assertEquals($account->id, $result->id);
     }
 }
