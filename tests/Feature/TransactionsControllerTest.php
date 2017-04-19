@@ -971,4 +971,90 @@ class TransactionsControllerTest extends BrowserKitTestCase
             $previous = $value;
         }
     }
+
+    /**
+     * @test
+     * Non authorized users cannot modify frequencies.
+     * @POST('/api/transactions/{transaction_id}/increase_frequency
+     */
+    public function given_noAuthorization_When_increase_frequency_Then_Returns401() {
+
+        $result = $this->post('/api/transactions/50/increase_frequency', []);
+
+        // Assert
+        $result->seeStatusCode(401);
+    }
+
+    /**
+     * @test
+     * Cannot increment the frequency of a transaction that does not exist
+     * @POST('/api/transactions/{transaction_id}/increase_frequency
+     */
+    public function given_nonExistingTransactionId_When_increase_frequency_Then_Returns404() {
+
+        $user = factory(\App\User::class)->create();
+
+        // Act
+        $result = $this->post('/api/transactions/50/increase_frequency', [], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(404)
+            ->seeText("Transaction not found");
+    }
+
+    /**
+     * @test
+     * Trying to modify transaction frequencies not performed by current is forbidden.
+     */
+    public function given_transactionNotPerformedByCurrentUser_When_increase_frequency_Then_Returns403() {
+
+        $current_user = factory(\App\User::class)->create();
+        $user = factory(\App\User::class)->create();
+        $agent = factory(Agent::class)->create();
+        $transaction = factory(\App\Transaction::class)->create([
+            'user_id'                => $user->id,
+            'agent_destination'     => $agent->id
+        ]);
+
+        // Act
+        $result = $this->post('/api/transactions/' . $transaction->id . '/increase_frequency', [], $this->headers($current_user));
+
+        $result->seeStatusCode(403)
+            ->seeText("User does not have permissions to access this transaction");
+    }
+
+    /**
+     * @test
+     * @POST('/api/transactions/{id}/increase_frequency')
+     * Requesting to increment the frequency of a valid transaction is allowed if the user is logged in and is the emisor of the transaction
+     */
+    public function given_validTransaction_When_increase_frequency_Then_ReturnsTransaction() {
+
+        // Arrange
+        $user = factory(App\User::class)->create();
+
+        $source_account = factory(\App\Account::class)->create([
+            'user_id'       => $user->id
+        ]);
+        $dest_agent = factory(App\Agent::class)->create();
+        $transaction = factory(App\Transaction::class)->create([
+            'user_id'           => $user->id,
+            'account_source'    => $source_account->id,
+            'agent_destination' => $dest_agent->id,
+            'frequency'         => 50
+        ]);
+
+        // Act
+        $result = $this->post('/api/transactions/' . $transaction->id . '/increase_frequency', [], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(200)
+            ->seeJsonStructure([
+                'id', 'date_start', 'date_end', 'date_creation', 'state', 'concept', 'agent_destination', 'agent_source',
+                'amount_source', 'currency_source', 'amount_destination', 'amount_estimated', 'currency_destination'
+            ]);
+
+        $updated_transaction = \App\Transaction::where('id', $transaction->id)->first();
+        self::assertEquals(51, $updated_transaction->frequency);
+    }
 }
