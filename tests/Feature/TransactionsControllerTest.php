@@ -655,6 +655,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $result = $this->get('/api/transactions/' . $transaction->id . ' /signature_positions', $this->headers($user));
 
         // Assert
+
         $result->seeStatusCode(200)
             ->seeJsonStructure([
                'positions', 'signatureLength'
@@ -801,5 +802,110 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $updated_transaction = \App\Transaction::where('id', $transaction->id)->first();
         self::assertNotNull($updated_transaction);
         self::assertEquals(5, $updated_transaction->state);
+    }
+
+    /**
+     * @test
+     * Given an sorted unique array, when sorting and unique, then should return an array sorted by value asc and with no repeated elements
+     */
+    public function given_sortedUniqueArray_When_unique_sort_array_Then_ReturnsSortedUniqueArray() {
+        $array = [0, 1, 2, 3];
+
+        $controller = new \App\Http\Controllers\TransactionsController();
+
+        // Act
+        $result = $controller->unique_sort_array($array);
+
+        // Assert
+        self::assertNotNull($result);
+        $previous = -1;
+        for ($i = 0; $i<count($result); $i++) {
+            $value = $result[$i];
+            self::assertNotNull($value);
+            self::assertFalse($previous == $value);
+            self::assertTrue($previous < $value);
+            $previous = $value;
+        }
+    }
+
+    /**
+     * @test
+     * Given an sorted but repeated element array, when sorting and unique, then should return an array sorted by value asc and with no repeated elements
+     */
+    public function given_sortedRepeatArray_When_unique_sort_array_Then_ReturnsSortedUniqueArray() {
+
+        $array = [50, 55, 55, 300];
+
+        $controller = new \App\Http\Controllers\TransactionsController();
+
+        // Act
+        $result = $controller->unique_sort_array($array);
+
+        // Assert
+        self::assertNotNull($result);
+        self::assertEquals(3, count($result));
+
+        $previous = -1;
+        for ($i = 0; $i<count($result); $i++) {
+            $value = $result[$i];
+            self::assertNotNull($value);
+            self::assertFalse($previous == $value);
+            self::assertTrue($previous < $value);
+            $previous = $value;
+        }
+    }
+
+    /**
+     * @test
+     * Given an unsorted array, when sorting and unique, then should return an array sorted by value asc and with no repeated elements
+     */
+    public function given_unsortedUniqueArray_When_unique_sort_array_Then_ReturnsSortedUniqueArray() {
+
+        $array = [500, 55, 40, 3];
+
+        $controller = new \App\Http\Controllers\TransactionsController();
+
+        // Act
+        $result = $controller->unique_sort_array($array);
+
+        // Assert
+        self::assertNotNull($result);
+        self::assertEquals(4, count($result));
+
+        $previous = -1;
+        for ($i = 0; $i<count($result); $i++) {
+            $value = $result[$i];
+            self::assertNotNull($value);
+            self::assertFalse($previous == $value);
+            self::assertTrue($previous < $value);
+            $previous = $value;
+        }
+    }
+
+    /**
+     * @test
+     * Given an unsorted, repeated element array, when sorting and unique, then should return an array sorted by value asc and with no repeated elements
+     */
+    public function given_unsortedRepeatedArray_When_unique_sort_array_Then_ReturnsSortedUniqueArray() {
+
+        $array = [500, 55, 4000, 500, 55, 3];
+
+        $controller = new \App\Http\Controllers\TransactionsController();
+
+        // Act
+        $result = $controller->unique_sort_array($array);
+
+        // Assert
+        self::assertNotNull($result);
+        self::assertEquals(4, count($result));
+
+        $previous = -1;
+        for ($i = 0; $i<count($result); $i++) {
+            $value = $result[$i];
+            self::assertNotNull($value);
+            self::assertFalse($previous == $value);
+            self::assertTrue($previous < $value);
+            $previous = $value;
+        }
     }
 }
