@@ -48,4 +48,5 @@ $api->version('v1', ['middleware' => 'api.auth'], function ($api) {
     $api->get('transactions/{id}/signature_positions', 'App\Http\Controllers\TransactionsController@signaturePositions');
     $api->post('transactions/{id}/signature_otp', 'App\Http\Controllers\TransactionsController@signatureOtp');
     $api->post('transactions/{id}/signature_confirmation', 'App\Http\Controllers\TransactionsController@signatureConfirmation');
+    $api->post('transactions/{id}/check_currency', 'App\Http\Controllers\TransactionsController@check_currency');
 });

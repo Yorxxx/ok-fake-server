@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
+use phpDocumentor\Reflection\Types\Integer;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 
@@ -57,6 +58,16 @@ class TransactionsController extends AuthController
             return $this->response->errorForbidden();
         }
         return $this->item($data, new TransactionsTranformer);
+    }
+
+    /**
+     * Checks the currency for a given transaction
+     * TODO for faking purposes, does not modify the estimated amount, and just returns the existing data
+     * @param $id Integer the identifier of the transaction to check
+     * @POST('/api/transactions/{id}/check_currency')
+     */
+    public function check_currency($id) {
+        return self::show($id);
     }
 
     /**

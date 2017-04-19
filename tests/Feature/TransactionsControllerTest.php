@@ -194,7 +194,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
     /**
      * @test
-     * TEST: GET /api/transactions/{id}
+     * @GET /api/transactions/{id}
      * Requesting an authorized transaction by id performed by current user, should return the transaction details
      */
     public function given_AuthorizedExistingTransaction_When_Show_Then_ReturnsTransaction() {
@@ -801,5 +801,66 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $updated_transaction = \App\Transaction::where('id', $transaction->id)->first();
         self::assertNotNull($updated_transaction);
         self::assertEquals(5, $updated_transaction->state);
+    }
+
+    /**
+     * @test
+     * Cannot check currency for a transaction if not authorized
+     * @POST('/api/transactions/{transaction_id}/check_currency
+     */
+    public function given_noAuthorization_When_checkCurrency_Then_Returns401() {
+
+        $result = $this->post('/api/transactions/50/check_currency', []);
+
+        // Assert
+        $result->seeStatusCode(401);
+    }
+
+    /**
+     * @test
+     * If asked for currency of a transaction that do not exist, then returns 404
+     * @POST('/api/transactions/{transaction_id}/check_currency
+     */
+    public function given_nonExistingTransactionId_When_CheckCurrency_Then_Returns404() {
+
+        $user = factory(\App\User::class)->create();
+
+        // Act
+        $result = $this->post('/api/transactions/50/check_currency', [], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(404)
+            ->seeText("Transaction not found");
+    }
+
+    /**
+     * @test
+     * @POST('/api/transactions/{id}/check_currency')
+     * Requesting the currency check for an existing transaction, returns the transaction
+     */
+    public function given_AuthorizedExistingTransaction_When_CheckCurrency_Then_ReturnsTransaction() {
+
+        // Arrange
+        $user = factory(App\User::class)->create();
+
+        $source_account = factory(\App\Account::class)->create([
+            'user_id'       => $user->id
+        ]);
+        $dest_agent = factory(App\Agent::class)->create();
+        $transaction = factory(App\Transaction::class)->create([
+            'user_id'           => $user->id,
+            'account_source'    => $source_account->id,
+            'agent_destination' => $dest_agent->id
+        ]);
+
+        // Act
+        $result = $this->post('/api/transactions/' . $transaction->id . '/check_currency', [], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(200)
+            ->seeJsonStructure([
+                'id', 'date_start', 'date_end', 'date_creation', 'state', 'concept', 'agent_destination', 'agent_source',
+                'amount_source', 'currency_source', 'amount_destination', 'amount_estimated', 'currency_destination'
+            ]);
     }
 }
