@@ -154,8 +154,7 @@ class TransactionsController extends AuthController
         }
 
         $positions = [random_int(1, 8), random_int(1, 8), random_int(1, 8), random_int(1, 8)];
-        sort($positions, SORT_NUMERIC);
-        return ['positions'     => array_unique($positions, SORT_NUMERIC),
+        return ['positions'     => self::unique_sort_array($positions),
             'signatureLength'   => 8];
     }
 
@@ -180,6 +179,17 @@ class TransactionsController extends AuthController
         }
 
         return ['ticket'    => $this->generateRandomString()];
+    }
+
+    /**
+     * Generates a unique (ie, a number can only be once within the array), sorted by number.
+     * @param array $array the array to sort and unique.
+     * @return array an array sorted an unique.
+     */
+    public function unique_sort_array(array $array) {
+        sort($array, SORT_NUMERIC);
+        $data = array_unique($array, SORT_NUMERIC);
+        return array_values($data);
     }
 
     /**

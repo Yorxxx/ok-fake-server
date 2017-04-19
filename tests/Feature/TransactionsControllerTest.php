@@ -655,6 +655,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $result = $this->get('/api/transactions/' . $transaction->id . ' /signature_positions', $this->headers($user));
 
         // Assert
+
         $result->seeStatusCode(200)
             ->seeJsonStructure([
                'positions', 'signatureLength'
@@ -815,7 +816,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
         // Assert
         $result->seeStatusCode(401);
     }
-
+  
     /**
      * @test
      * If asked for currency of a transaction that do not exist, then returns 404
@@ -832,7 +833,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $result->seeStatusCode(404)
             ->seeText("Transaction not found");
     }
-
+  
     /**
      * @test
      * @POST('/api/transactions/{id}/check_currency')
@@ -862,5 +863,112 @@ class TransactionsControllerTest extends BrowserKitTestCase
                 'id', 'date_start', 'date_end', 'date_creation', 'state', 'concept', 'agent_destination', 'agent_source',
                 'amount_source', 'currency_source', 'amount_destination', 'amount_estimated', 'currency_destination'
             ]);
+    }
+    
+    /*
+     * @test
+     * Given an sorted unique array, when sorting and unique, then should return an array sorted by value asc and with no repeated elements
+     */
+    public function given_sortedUniqueArray_When_unique_sort_array_Then_ReturnsSortedUniqueArray() {
+        $array = [0, 1, 2, 3];
+
+        $controller = new \App\Http\Controllers\TransactionsController();
+
+        // Act
+        $result = $controller->unique_sort_array($array);
+
+        // Assert
+        self::assertNotNull($result);
+        $previous = -1;
+        for ($i = 0; $i<count($result); $i++) {
+            $value = $result[$i];
+            self::assertNotNull($value);
+            self::assertFalse($previous == $value);
+            self::assertTrue($previous < $value);
+            $previous = $value;
+        }
+    }
+
+    /*
+     * @test
+     * Given an sorted but repeated element array, when sorting and unique, then should return an array sorted by value asc and with no repeated elements
+     */
+    public function given_sortedRepeatArray_When_unique_sort_array_Then_ReturnsSortedUniqueArray() {
+
+        $array = [50, 55, 55, 300];
+
+        $controller = new \App\Http\Controllers\TransactionsController();
+
+        // Act
+        $result = $controller->unique_sort_array($array);
+
+        // Assert
+        self::assertNotNull($result);
+        self::assertEquals(3, count($result));
+
+        $previous = -1;
+        for ($i = 0; $i<count($result); $i++) {
+            $value = $result[$i];
+            self::assertNotNull($value);
+            self::assertFalse($previous == $value);
+            self::assertTrue($previous < $value);
+            $previous = $value;
+        }
+    }
+
+    
+
+    /*
+     * @test
+     * Given an unsorted array, when sorting and unique, then should return an array sorted by value asc and with no repeated elements
+     */
+    public function given_unsortedUniqueArray_When_unique_sort_array_Then_ReturnsSortedUniqueArray() {
+
+        $array = [500, 55, 40, 3];
+
+        $controller = new \App\Http\Controllers\TransactionsController();
+
+        // Act
+        $result = $controller->unique_sort_array($array);
+
+        // Assert
+        self::assertNotNull($result);
+        self::assertEquals(4, count($result));
+
+        $previous = -1;
+        for ($i = 0; $i<count($result); $i++) {
+            $value = $result[$i];
+            self::assertNotNull($value);
+            self::assertFalse($previous == $value);
+            self::assertTrue($previous < $value);
+            $previous = $value;
+        }
+    }
+
+    /**
+     * @test
+     * Given an unsorted, repeated element array, when sorting and unique, then should return an array sorted by value asc and with no repeated elements
+     */
+    public function given_unsortedRepeatedArray_When_unique_sort_array_Then_ReturnsSortedUniqueArray() {
+
+        $array = [500, 55, 4000, 500, 55, 3];
+
+        $controller = new \App\Http\Controllers\TransactionsController();
+
+        // Act
+        $result = $controller->unique_sort_array($array);
+
+        // Assert
+        self::assertNotNull($result);
+        self::assertEquals(4, count($result));
+
+        $previous = -1;
+        for ($i = 0; $i<count($result); $i++) {
+            $value = $result[$i];
+            self::assertNotNull($value);
+            self::assertFalse($previous == $value);
+            self::assertTrue($previous < $value);
+            $previous = $value;
+        }
     }
 }
