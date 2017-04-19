@@ -101,8 +101,8 @@ $factory->define(App\Transaction::class, function(\Faker\Generator $faker) {
             $user = Agent::inRandomOrder()->first();
             return $user->id;
         },
-        'account_source' =>  $source->id,
-        'user_id' =>  $source->user->id,
+        'account_source' =>  $source != null ? $source->id : 0,
+        'user_id' =>  $source != null ? $source->user->id : 0,
         'date_creation' => $date,
         'date_start' => $date->add(date_interval_create_from_date_string('2 days')),
         'date_end' => $date->add(date_interval_create_from_date_string('5 days'))
