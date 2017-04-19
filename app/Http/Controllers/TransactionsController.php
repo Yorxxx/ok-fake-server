@@ -117,8 +117,8 @@ class TransactionsController extends AuthController
             $values['date_end'] = Carbon::now()->addDays(7);
             $values['account_source'] = $emisor->id;
             if ($transaction = Transaction::create($values)) {
-                $emisor->amount-=$request['amount'];
-                $emisor->save();
+                //$emisor->amount-=$request['amount'];
+                //$emisor->save();
                 return $this->response->item($transaction, $transformer);
             }
 
@@ -227,7 +227,9 @@ class TransactionsController extends AuthController
             return $this->response->errorForbidden("User does not have permissions to access this transaction");
         }
         $transaction->state = 5;
+        $transaction->source->amount -= $transaction->amount_source;
         $transaction->save();
+        $transaction->source->save();
 
         return;
     }

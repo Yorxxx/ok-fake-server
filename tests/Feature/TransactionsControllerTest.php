@@ -581,10 +581,10 @@ class TransactionsControllerTest extends BrowserKitTestCase
         // Check that has incremented the number of transactions
         self::assertTrue($updated_transactions->count() == $previous_transactions->count()+1);
 
-        // Check that the emissor amount has been decreased
+        // Check that the emissor amount has not been modified until confirmed
         $updated_account = \App\Account::where('id', $account->id)->first();
-        self::assertFalse($updated_account->amount == $account->amount);
-        self::assertEquals($updated_account->amount, $account->amount-50);
+        self::assertTrue($updated_account->amount == $account->amount);
+        //self::assertEquals($updated_account->amount, $account->amount-50);
     }
 
     /**
@@ -789,9 +789,14 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         $user = factory(\App\User::class)->create();
         $agent = factory(Agent::class)->create();
+        $account = factory(\App\Account::class)->create([
+            'user_id'   => $user->id,
+            'amount'    => 10000
+        ]);
         $transaction = factory(\App\Transaction::class)->create([
-            'user_id'                => $user->id,
-            'agent_destination'     => $agent->id
+            'user_id'               => $user->id,
+            'agent_destination'     => $agent->id,
+            'amount_source'         => 50
         ]);
 
         // Act
@@ -802,6 +807,10 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $updated_transaction = \App\Transaction::where('id', $transaction->id)->first();
         self::assertNotNull($updated_transaction);
         self::assertEquals(5, $updated_transaction->state);
+
+        // Check the emisor account has been updated
+        $updated_account = \App\Account::where('id', $account->id)->first();
+        self::assertEquals(9950, $updated_account->amount);
     }
 
     /**
@@ -915,8 +924,6 @@ class TransactionsControllerTest extends BrowserKitTestCase
             $previous = $value;
         }
     }
-
-    
 
     /*
      * @test
