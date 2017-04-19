@@ -49,4 +49,5 @@ $api->version('v1', ['middleware' => 'api.auth'], function ($api) {
     $api->post('transactions/{id}/signature_otp', 'App\Http\Controllers\TransactionsController@signatureOtp');
     $api->post('transactions/{id}/signature_confirmation', 'App\Http\Controllers\TransactionsController@signatureConfirmation');
     $api->post('transactions/{id}/check_currency', 'App\Http\Controllers\TransactionsController@check_currency');
+    $api->post('transactions/{id}/increase_frequency', 'App\Http\Controllers\TransactionsController@increase_frequency');
 });

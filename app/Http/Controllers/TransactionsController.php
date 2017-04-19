@@ -71,6 +71,25 @@ class TransactionsController extends AuthController
     }
 
     /**
+     * Increseas the frequency of the given transaction
+     * @POST('/transactions/{id}/increase_frequency')
+     * @param $id Integer the identifier of the transaction
+     */
+    public function increase_frequency($id) {
+        $user = $this->getUserFromToken();
+        $data = Transaction::where('id', $id)->first();
+        if (!$data) {
+            return $this->response()->errorNotFound("Transaction not found");
+        }
+        if (strcmp($user->id, "".$data->user_id) != 0) {
+            return $this->response->errorForbidden("User does not have permissions to access this transaction");
+        }
+        $data->frequency++;
+        $data->save();
+        return $this->item($data, new TransactionsTranformer);
+    }
+
+    /**
      * Stores a new transaction
      * @POST('/api/transactions')
      * @param Request $request the request
