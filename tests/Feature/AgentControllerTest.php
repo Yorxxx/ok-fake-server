@@ -225,4 +225,111 @@ class AgentControllerTest extends BrowserKitTestCase
         // Assert
         $result->seeStatusCode(500);
     }
+
+    /**
+     * @test
+     * @PUT('/api/agents/{id}')
+     * Updating new agents when not authorized should be forbidden
+     */
+    public function given_unauthorizedUser_When_update_Then_Returns401() {
+
+        $this->put('/api/agents/50', [
+            'owner'     => false,
+            'name'      => 'Foo Bar',
+            'phone'     => 665547878,
+            'prefix'    => 34,
+            'account'   => "ES1521002719380200073017",
+            'email'     => '',
+            'country'   => 'ES'])
+            ->seeStatusCode(401);
+    }
+
+    /**
+     * @test
+     * @PUT('/api/agents/{id}')
+     * If the request agent to be updated does not exist, return 404
+     */
+    public function given_notFoundAgent_When_update_Then_Returns404() {
+
+        $user = factory(\App\User::class)->create();
+
+        // Act
+        $result = $this->put('/api/agents/50', [
+            'owner'     => false,
+            'name'      => 'Foo Bar',
+            'phone'     => 665547878,
+            'prefix'    => 34,
+            'account'   => "ES1521002719380200073017",
+            'email'     => '',
+            'country'   => 'ES'], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(404);
+    }
+
+    /**
+     * @test
+     * @PUT('/api/agents/{id}')
+     * Only the user associated to the specified agent is allowed to update the entity
+     */
+    public function given_agentNotAssociatedWithCurrentUser_When_update_Then_ReturnsForbidden() {
+
+        // Arrange
+        $user = factory(App\User::class)->create();
+        $other_user = factory(App\User::class)->create();
+
+        $agent = factory(\App\Agent::class)->create([
+            'user_id'       => $other_user->id
+        ]);
+
+        // Act
+        $result = $this->put('/api/agents/' . $agent->id, ['name'      => 'Foo Bar',], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(403);
+    }
+
+    /**
+     * @test
+     * @PUT('/api/agents/{id}')
+     * Allowed users can update their agents data
+     */
+    public function given_validAgent_When_update_Then_UpdatesAgent() {
+
+        // Arrange
+        $user = factory(App\User::class)->create();
+
+        $agent = factory(\App\Agent::class)->create([
+            'user_id'       => $user->id,
+            'name'          => 'Foo',
+            'account'       => '',
+            'country'       => 'UK',
+            'updated_at'    => \Carbon\Carbon::now()->subHour(1)
+        ]);
+
+        // Act
+        $result = $this->put('/api/agents/' . $agent->id,
+            [
+                'name'      => 'Foo Bar',
+                'account'   => 'Foo account',
+                'country'   => 'ES'
+            ], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(200)
+            ->seeJsonStructure([
+                'owner', 'name', 'phone', 'prefix', 'account', 'email', 'country', 'user_id', 'id'
+            ]);
+
+        $updated_agent = \App\Agent::where('id', $agent->id)->first();
+        self::assertNotNull($updated_agent);
+        self::assertEquals('Foo Bar', $updated_agent->name);
+        self::assertEquals('Foo account', $updated_agent->account);
+        self::assertEquals('ES', $updated_agent->country);
+        self::assertEquals($agent->id, $updated_agent->id);
+        self::assertEquals($agent->email, $updated_agent->email);
+        self::assertEquals($agent->phone, $updated_agent->phone);
+        self::assertEquals($agent->owner, $updated_agent->owner);
+        self::assertTrue($updated_agent->updated_at->gt($agent->updated_at));
+    }
 }

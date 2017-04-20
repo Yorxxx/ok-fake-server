@@ -41,6 +41,7 @@ $api->version('v1', ['middleware' => 'api.auth'], function ($api) {
     $api->get('settings', 'App\Http\Controllers\SettingsController@getSettings');
     $api->get('agents', 'App\Http\Controllers\AgentsController@getAgents');
     $api->post('agents', 'App\Http\Controllers\AgentsController@store');
+    $api->put('agents/{id}', 'App\Http\Controllers\AgentsController@update');
 
     $api->get('transactions', 'App\Http\Controllers\TransactionsController@getTransactions');
     $api->post('transactions', 'App\Http\Controllers\TransactionsController@store');
