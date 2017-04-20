@@ -43,14 +43,21 @@ class AgentsTranformer extends TransformerAbstract
         if ($values == null)
             return null;
 
-        return [
-            'account'   => array_key_exists('account', $values) ? $values['account'] : '',
-            'owner'     => array_key_exists('owner', $values) ? $values['owner'] : false,
-            'name'      => $values['name'],
-            'phone'     => '+'.$values['prefix'].'-'.$values['phone'],
-            'email'     => array_key_exists('email', $values) ? $values['email'] : '',
-            'country'   => array_key_exists('country', $values) ? $values['country'] : '',
-            'user_id'   => array_key_exists('user_id', $values) ? $values['user_id'] : ''
+        $result =  [
+            'account'   => array_key_exists('account', $values) ? $values['account'] : null,
+            'owner'     => array_key_exists('owner', $values) ? $values['owner'] : null,
+            'name'      => array_key_exists('name', $values) ? $values['name'] : null,
+            'phone'      => array_key_exists('phone', $values) ? '+'.$values['prefix'].'-'.$values['phone'] : null,
+            'email'     => array_key_exists('email', $values) ? $values['email'] : null,
+            'country'   => array_key_exists('country', $values) ? $values['country'] : null,
+            'user_id'   => array_key_exists('user_id', $values) ? $values['user_id'] : null
         ];
+
+        foreach($result as $key=>$value)
+        {
+            if(is_null($value) || ($value == '' && !is_bool($value)))
+                unset($result[$key]);
+        }
+        return $result;
     }
 }

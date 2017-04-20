@@ -95,34 +95,30 @@ class AgentsTransformerTest extends BrowserKitTestCase
         self::assertEquals("+34-665547878", $result['phone']);
         self::assertEquals("ES1521002719380200073017", $result['account']);
         self::assertEquals("ES", $result['country']);
-        self::assertEquals("", $result['email']);
+        self::assertArrayNotHasKey("email", $result);
     }
 
     /**
      * @test
-     * Passing a null account in the request, should map
+     * If the input does not have an expected key, do not return an array with an empty or null value, removing the null value keys from the array
      */
-    public function given_inputWithoutAccount_When_mapFromRequest_Then_ReturnsMappedData() {
+    public function given_missingKeys_When_mapFromRequest_Then_ReturnsMappedDataWithoutNullValueKeys() {
 
         // Arrange
         $transformer = new \App\Transformers\AgentsTranformer;
 
         // Act
         $result = $transformer->mapFromRequest([
-            'owner'     => false,
-            'name'      => 'Foo Bar',
-            'phone'     => 665547878,
-            'prefix'    => 34,
-            'email'     => '',
+            'email'     => 'aa',
             'country'   => 'ES']);
 
         // Assert
         self::assertNotNull($result);
-        self::assertEquals(false, $result['owner']);
-        self::assertEquals("Foo Bar", $result['name']);
-        self::assertEquals("+34-665547878", $result['phone']);
+        self::assertArrayNotHasKey('name', $result);
+        self::assertArrayNotHasKey('owner', $result);
+        self::assertArrayNotHasKey('phone', $result);
+        self::assertArrayNotHasKey('account', $result);
         self::assertEquals("ES", $result['country']);
-        self::assertEquals("", $result['email']);
-        self::assertEquals("", $result['account']);
+        self::assertEquals("aa", $result['email']);
     }
 }
