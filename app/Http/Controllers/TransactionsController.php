@@ -27,8 +27,10 @@ class TransactionsController extends AuthController
      * @GET('/api/transactions')
      * @Response(200, $transactions)
      */
-    public function getTransactions() {
+    public function getTransactions(Request $request) {
+        $user = $this->getUserFromToken();
         $data = $this->getUserFromToken()->transactions;
+
 
         foreach ($data as $transaction) {
             if ($transaction->state == 5) {
@@ -39,7 +41,17 @@ class TransactionsController extends AuthController
                 }
             }
         }
-        $data = $this->getUserFromToken()->transactions;
+
+        if (array_key_exists('frequency', $request->all()) && $request->all()['frequency']) {
+            $data = Transaction::where('user_id', $user->id)
+                ->orderBy('frequency', 'desc')
+                ->get();
+        }
+        else {
+            $data = Transaction::where('user_id', $user->id)
+                ->orderBy('date_creation', 'desc')
+                ->get();
+        }
         return $this->collection($data, new TransactionsTranformer, ['key' => 'results']);
     }
 
