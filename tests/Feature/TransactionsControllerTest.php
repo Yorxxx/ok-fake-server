@@ -580,11 +580,59 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $updated_transactions = \App\Transaction::all();
         // Check that has incremented the number of transactions
         self::assertTrue($updated_transactions->count() == $previous_transactions->count()+1);
+        self::assertEquals(0, $updated_transactions[0]->state);
 
         // Check that the emissor amount has not been modified until confirmed
         $updated_account = \App\Account::where('id', $account->id)->first();
         self::assertTrue($updated_account->amount == $account->amount);
         //self::assertEquals($updated_account->amount, $account->amount-50);
+    }
+
+    /**
+     * @test
+     * @POST('/api/transactions/')
+     * Storing a transaction whose destination agent does not have specified an account, sets the status of this account as
+     * "NEED_INFO".
+     */
+    public function given_destinationAgentWithoutAccount_When_Store_Then_StoresTransactionAsRequiredInfo() {
+        // Arrange
+        $user = factory(App\User::class)->create();
+        $account = factory(\App\Account::class)->create([
+            'user_id'   => $user->id
+        ]);
+        $agent = factory(App\Agent::class)->create([
+            'user_id'   => $user->id,
+            'account'   => ''
+        ]);
+
+        $previous_transactions = \App\Transaction::all();
+
+        // Act
+        $result = $this->post('/api/transactions/', [
+            'emisor_account'            => $account->id,
+            'agent_destination'         => $agent->id,
+            'concept'                   => 'foo',
+            'amount'                    => 50,
+            'amount_estimated'          => "42.5",
+            'currency_source'           => 'EUR',
+            'currency_destination'      => 'EUR'
+        ], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(200)
+            ->seeJsonStructure([
+                'id', 'agent_destination', 'agent_source', 'date_start', 'date_end', 'date_creation', 'amount_destination',
+                'amount_estimated', 'state', 'concept', 'currency_destination', 'amount_source', 'currency_source'
+            ]);
+
+        $updated_transactions = \App\Transaction::all();
+        // Check that has incremented the number of transactions
+        self::assertTrue($updated_transactions->count() == $previous_transactions->count()+1);
+        self::assertEquals(7, $updated_transactions[0]->state);
+
+        // Check that the emissor amount has not been modified until confirmed
+        $updated_account = \App\Account::where('id', $account->id)->first();
+        self::assertTrue($updated_account->amount == $account->amount);
     }
 
     /**
