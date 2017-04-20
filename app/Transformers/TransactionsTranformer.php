@@ -17,7 +17,7 @@ class TransactionsTranformer extends TransformerAbstract
                 'name'              => $transaction->destination->name,
                 'phone'             => $transaction->destination->localPhone(),
                 'prefix'            => $transaction->destination->prefix(),
-                'account'           => $transaction->destination->account,
+                'account'           => $transaction->destination->account == null ? '' : $transaction->destination->account,
                 'country'           => $transaction->destination->country,
                 'sort_code'         => ''
             ],
