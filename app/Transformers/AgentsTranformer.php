@@ -44,7 +44,7 @@ class AgentsTranformer extends TransformerAbstract
             return null;
 
         return [
-            'account'   => $values['account'],
+            'account'   => array_key_exists('account', $values) ? $values['account'] : '',
             'owner'     => array_key_exists('owner', $values) ? $values['owner'] : false,
             'name'      => $values['name'],
             'phone'     => '+'.$values['prefix'].'-'.$values['phone'],

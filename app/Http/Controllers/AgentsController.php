@@ -35,7 +35,6 @@ class AgentsController extends AuthController
             $user = $this->getUserFromToken();
 
             $rules = [
-                'account'   => 'required|max:255',
                 'name'      => 'required',
                 'phone'     => 'required'
             ];
