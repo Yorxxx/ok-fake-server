@@ -97,4 +97,31 @@ class AgentsTransformerTest extends BrowserKitTestCase
         self::assertEquals("ES", $result['country']);
         self::assertEquals("", $result['email']);
     }
+
+    /**
+     * @test
+     * Passing a null account in the request, should map
+     */
+    public function given_inputWithoutAccount_When_mapFromRequest_Then_ReturnsMappedData() {
+
+        // Arrange
+        $transformer = new \App\Transformers\AgentsTranformer;
+
+        // Act
+        $result = $transformer->mapFromRequest([
+            'owner'     => false,
+            'name'      => 'Foo Bar',
+            'phone'     => 665547878,
+            'prefix'    => 34,
+            'email'     => '',
+            'country'   => 'ES']);
+
+        // Assert
+        self::assertNotNull($result);
+        self::assertEquals(false, $result['owner']);
+        self::assertEquals("Foo Bar", $result['name']);
+        self::assertEquals("+34-665547878", $result['phone']);
+        self::assertEquals("ES", $result['country']);
+        self::assertEquals("", $result['email']);
+    }
 }
