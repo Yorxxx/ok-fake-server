@@ -123,5 +123,6 @@ class AgentsTransformerTest extends BrowserKitTestCase
         self::assertEquals("+34-665547878", $result['phone']);
         self::assertEquals("ES", $result['country']);
         self::assertEquals("", $result['email']);
+        self::assertEquals("", $result['account']);
     }
 }
