@@ -33,7 +33,8 @@ class TransactionsTranformer extends TransformerAbstract
             'concept'               => $transaction->concept,
             'currency_destination'  => $transaction->currency_destination,
             'amount_source'         => $transaction->amount_source,
-            'currency_source'       => $transaction->currency_source
+            'currency_source'       => $transaction->currency_source,
+            'frequency'             => $transaction->frequency == null ? 0 : $transaction->frequency
         ];
     }
 

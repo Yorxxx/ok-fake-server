@@ -45,7 +45,8 @@ class TransactionsTransformerTest extends BrowserKitTestCase
             'currency_destination'  => "EUR",
             'date_start'            => $time,
             'date_end'              => $time,
-            'date_creation'         => $time
+            'date_creation'         => $time,
+            'frequency'             => 4
         ]);
 
         $result = $transformer->transform($transaction);
@@ -66,6 +67,7 @@ class TransactionsTransformerTest extends BrowserKitTestCase
         self::assertArrayHasKey('currency_source', $result);
         self::assertArrayHasKey('agent_destination', $result);
         self::assertArrayHasKey('agent_source', $result);
+        self::assertArrayHasKey('frequency', $result);
 
         self::assertEquals($transaction->id, $result['id']);
         self::assertNotNull($result['date_start']);
@@ -79,6 +81,7 @@ class TransactionsTransformerTest extends BrowserKitTestCase
         self::assertEquals($expectedTime, $result['date_start']);
         self::assertEquals($expectedTime, $result['date_end']);
         self::assertEquals($expectedTime, $result['date_creation']);
+        self::assertEquals(4, $result['frequency']);
 
         $result_dest_agent = $result['agent_destination'];
         self::assertNotNull($result_dest_agent);

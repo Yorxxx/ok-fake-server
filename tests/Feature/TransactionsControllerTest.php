@@ -48,14 +48,32 @@ class TransactionsControllerTest extends BrowserKitTestCase
             'user_id'       => $user->id
         ]);
 
-        factory(App\Transaction::class)->create([
+        $yesterday_transaction = factory(App\Transaction::class)->create([
             'user_id'           => $user->id,
             'account_source'    => $source_account->id,
-            'agent_destination' => $dest_agent->id
+            'agent_destination' => $dest_agent->id,
+            'date_creation'     => Carbon::now()->subDay(1)
         ]);
 
-        $this->get('/api/transactions', $this->headers($user))
-            ->seeStatusCode(200)
+        $today_transaction = factory(App\Transaction::class)->create([
+            'user_id'           => $user->id,
+            'account_source'    => $source_account->id,
+            'agent_destination' => $dest_agent->id,
+            'date_creation'     => Carbon::now()->subHour(1)
+        ]);
+
+        $lastweek_transaction = factory(App\Transaction::class)->create([
+            'user_id'           => $user->id,
+            'account_source'    => $source_account->id,
+            'agent_destination' => $dest_agent->id,
+            'date_creation'     => Carbon::now()->subWeek()
+        ]);
+
+        // Act
+        $result = $this->get('/api/transactions', $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(200)
             ->seeJsonStructure([
                 "results" => [
                     '*' => [
@@ -64,6 +82,84 @@ class TransactionsControllerTest extends BrowserKitTestCase
                     ]
                 ]
             ]);
+
+        // Check returned results are ordered by date desc
+        $json_array = json_decode($result->response->content());
+        $results = $json_array->results;
+        self::assertEquals(3, count($results));
+
+        $previous_date_value = Carbon::now();
+        foreach ($results as $item) {
+            $transaction_date = Carbon::createFromTimestamp($item->date_creation/1000);
+            self::assertTrue($previous_date_value->gt($transaction_date));
+            $previous_date_value = $transaction_date;
+        }
+        self::assertEquals($today_transaction->id, $results[0]->id);
+        self::assertEquals($yesterday_transaction->id, $results[1]->id);
+        self::assertEquals($lastweek_transaction->id, $results[2]->id);
+    }
+
+    /**
+     * @test
+     * Test: GET: /api/transactions?frequency=true
+     * Requesting user transactions should return a list containing all the transactions associated to the user ordered by frequency
+     */
+    public function given_frequencyTransaction_When_getTransactionsByFrequency_Then_ReturnsUserTransactionsOrderedByFrequency() {
+
+        $user = factory(App\User::class)->create();
+        $dest_agent = factory(App\Agent::class)->create();
+        $source_account = factory(\App\Account::class)->create([
+            'user_id'       => $user->id
+        ]);
+
+        factory(App\Transaction::class)->create([
+            'user_id'           => $user->id,
+            'account_source'    => $source_account->id,
+            'agent_destination' => $dest_agent->id,
+            'date_creation'     => Carbon::now()->subDay(1),
+            'frequency'         => 2
+        ]);
+
+        factory(App\Transaction::class)->create([
+            'user_id'           => $user->id,
+            'account_source'    => $source_account->id,
+            'agent_destination' => $dest_agent->id,
+            'date_creation'     => Carbon::now(),
+            'frequency'         => 20
+        ]);
+
+        factory(App\Transaction::class)->create([
+            'user_id'           => $user->id,
+            'account_source'    => $source_account->id,
+            'agent_destination' => $dest_agent->id,
+            'date_creation'     => Carbon::now()->subWeek(),
+            'frequency'         => 5
+        ]);
+
+        // Act
+        $result = $this->get('/api/transactions?frequency=true', $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(200)
+            ->seeJsonStructure([
+                "results" => [
+                    '*' => [
+                        'id', 'date_start', 'date_end', 'date_creation', 'amount_destination', 'amount_estimated',
+                        'state', 'concept', 'currency_destination', 'amount_source', 'currency_source'
+                    ]
+                ]
+            ]);
+
+        // Check returned results are ordered by date desc
+        $json_array = json_decode($result->response->content());
+        $results = $json_array->results;
+        self::assertEquals(3, count($results));
+
+        $previous_frequency_value = 100;
+        foreach ($results as $item) {
+            self::assertTrue($previous_frequency_value > $item->frequency);
+            $previous_frequency_value = $item->frequency;
+        }
     }
 
     /**
