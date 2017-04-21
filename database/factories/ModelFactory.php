@@ -36,7 +36,7 @@ $factory->define(App\Account::class, function (Faker\Generator $faker) {
         'alias' => $faker->word,
         'linked' => 1,
         'currency' => 'EUR',
-        'amount' => $faker->randomFloat(2, 100, 1000000),
+        'amount' => $faker->randomFloat(2, 100, 100000),
         'enterprise' => $faker->company,
         'contract_number' => ''  . $faker-> randomDigitNotNull,
         'user_id' => function() {
@@ -91,7 +91,7 @@ $factory->define(App\Transaction::class, function(\Faker\Generator $faker) {
     $source = Account::inRandomOrder()->first();
 
     return [
-        'concept' => $faker->name,
+        'concept' => $faker->word,
         'amount_source' => $amount_source,
         'amount_destination' => $amount_destination,
         'currency_source' => 'EUR',
@@ -107,7 +107,7 @@ $factory->define(App\Transaction::class, function(\Faker\Generator $faker) {
         'account_source' =>  $source != null ? $source->id : 0,
         'user_id' =>  $source != null ? $source->user->id : 0,
         'date_creation' => $date,
-        'date_start' => $date->add(date_interval_create_from_date_string('2 days')),
+        'date_start' => $date,
         'date_end' => $date->add(date_interval_create_from_date_string('3 days'))
     ];
 });
