@@ -17,7 +17,9 @@ class UsersTableSeeder extends Seeder
 
         for ($i = 0; $i < 10; $i++) {
             // Add random users
-            factory(App\User::class)->create();
+            factory(App\User::class)->create([
+                'password' => bcrypt(0000)
+            ]);
         }
 
         Model::reguard();

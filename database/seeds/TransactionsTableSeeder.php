@@ -14,7 +14,6 @@ class TransactionsTableSeeder extends Seeder
     public function run()
     {
         Model::unguard();
-        DB::table('transactions')->delete();
 
         // Retrieve all accounts, and for each one, generate a random amount of transactions
         $accounts = \App\Account::all();
