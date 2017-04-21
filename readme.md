@@ -51,20 +51,114 @@ This package provides tools for the following, and more:
 ## Installation
 
 First install dependencies via composer.
-```bash
-composer install
-php artisan vendor:publish --provider="Dingo\Api\Provider\LaravelServiceProvider"
-php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\JWTAuthServiceProvider"
-php artisan jwt:generate
+```sh
+$ composer install //Install dependencies
+$ php artisan vendor:publish --provider="Dingo\Api\Provider\LaravelServiceProvider" //Add Dingo provider
+$ php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\JWTAuthServiceProvider" //Add JWTAuth for authentication
+$ php artisan jwt:generate //Generate a key
 ```
-Define API_PREFIX environment variable, via path or .env file
-```bash
-API_PREFIX='api'
+
+
+## First launch
+There are a couple of steps to do before executing for the first time. 
+
+#### Define endpoint
+Define the endpoint of all the rest calls.
+```sh
+$ echo "API_PREFIX='api'" > .env
 ```
+There are more environment variables . See [Dingo Configuration](https://github.com/dingo/api/wiki/Configuration) for more info.
+
+
+#### Create database
+You need to create a database with associated tables in order to query elements. Go to the project folder and execute the following
+
+```sh
+$ touch database/database.sqlite // Create an empty file
+$ php artisan migrate //This will execute the migration files
+```
+
+Now the database is created, but it is empty.
+
+#### Add data
+Since the application does not allow to add users or accounts, you should store the data manually on the database.
+The first option is to run the database seeds provided with the project. This will add users, accounts, transactions and contacts.
+
+```sh
+$ php artisan migrate 
+```
+Users would be created with a default password of 0000. You might need to check user's document value, though.
+
+Another option, is to run an artisan command for adding users. This way, you have control over required user info, like name and login credentials.
+
+The execution script will ask for some input. When it has finished, an output will be displayed in the screen, with info about user, his account and performed transactions.
+```sh
+$ php artisan user:add
+ Specify user name:
+ > Foo Bar
+ Specify user NIF?:
+ > 11223344A
+ Specify user password:
+ > 
+
+ This will create a user with fake account, contacts and transactions. Proceed? (yes/no) [no]:
+ > yes
+
+Feeding data
+ 10/10 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+ +---------+-------------+-----------+---------+-------------------------+
+| User ID | Name        | Document  | DocType | Email                    |
++---------+-------------+-----------+---------+--------------------------+
+| 3       | Foo Bar     | 11223344A | N       | elody.durgan@example.org |
++---------+-------------+-----------+---------+--------------------------+
+
++------------+----------------------------------+-----------+----------+
+| Account ID | Number                           | Amount    | Currency |
++------------+----------------------------------+-----------+----------+
+| 3          | ES376508099128672015618101486163 | 321310.82 | EUR      |
++------------+----------------------------------+-----------+----------+
+
++------------+--------------------------+--------------+---------------+
+| Contact ID | Name                     | Phone        | Country     |
++------------+--------------------------+--------------+-------------+
+| 26         | Prof. Treva Baumbach DDS | 34-617280197 | Singapore   |
+| 27         | Roma Ondricka PhD        | 34-643505558 | Georgia     |
+| 28         | Vita Eichmann            | 34-603742780 | Estonia     |
+| 29         | Felix Grady              | 34-673370724 | Iraq        |
+| 30         | Rollin Veum MD           | 34-699204544 | Paraguay    |
+| 31         | Lempi Considine          | 34-613669767 | Estonia     |
+| 32         | Brielle Franecki         | 34-627955125 | Timor-Leste |
++------------+--------------------------+--------------+-------------+
+
++----------------+----------+---------+-------+-------------------+
+| Transaction ID | Concept  | Amount  | State | Agent destination |
++----------------+----------+---------+-------+-------------------+
+| 27             | dolores  | 415.344 | 8     | 26                |
+| 28             | suscipit | 193.669 | 0     | 27                |
+| 29             | est      | 319.185 | 0     | 28                |
+| 30             | non      | 264.162 | 3     | 29                |
+| 31             | dolor    | 343.67  | 6     | 30                |
+| 32             | ratione  | 53.23   | 7     | 31                |
+| 33             | aut      | 14.783  | 4     | 32                |
++----------------+----------+---------+-------+-------------------+
+```
+#### Update transactions
+A not required but recommended action is to mimic the transaction's state updates. After performing a new transaction in the app, it will be saved with an _in_process_ state. This is ok for demo purposes, but it could be even better if this "processing" transactions would automatically update to a definitive state after a while.
+For this, an Scheduled task has been added, that will update every _processing_ transaction to _completed_ after a couple of hours.
+You just need to add the following cron job to your machine.
+```sh
+$ php artisan schedule:run
+```
+This will execute every artisan command scheduled in the server.
+
+If you'd like to execute the command manually:
+```sh
+$ php artisan transaction:update
+``` 
 
 ## Execution
-```bash
-php artisan serve
+Now that you have configured the server for the first time, it can be launched:
+```sh
+$ php artisan serve
 ```
 
-You can define environment variables (environment, debug mode...) before launching. See [Dingo Configuration](https://github.com/dingo/api/wiki/Configuration) for more info.
