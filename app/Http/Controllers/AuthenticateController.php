@@ -17,7 +17,7 @@ class AuthenticateController extends AuthController
 
     /**
      * Authenticates a user
-     * @Post("/authenticate")
+     * @Post("/login")
      * @Request(email=foo&password=bar, contentType="application/x-www-form-urlencoded")
      * @Response(200, body={token=<token>}
      * @param Request $request the request data

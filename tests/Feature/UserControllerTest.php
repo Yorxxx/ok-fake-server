@@ -14,12 +14,12 @@ class UserControllerTest extends BrowserKitTestCase
     /**
      * @test
      *
-     * Test: POST /api/authenticate
+     * @POST('/api/login')
      * Authenticating without specifying the document value, throws error
      */
     public function given_missingdocument_when_authenticate_Then_Returns400() {
 
-        $this->post('/api/authenticate', ['password' => 'foo', 'doctype' => 'P'])
+        $this->post('/api/login', ['password' => 'foo', 'doctype' => 'P'])
             ->seeStatusCode(400)
             ->seeText("The document field is required");
     }
@@ -27,12 +27,12 @@ class UserControllerTest extends BrowserKitTestCase
     /**
      * @test
      *
-     * Test: POST /api/authenticate
+     * @POST('/api/login')
      * Authenticating without doctype throws error
      */
     public function given_missingdoctype_when_authenticate_Then_Returns400() {
 
-        $this->post('/api/authenticate', ['document' => 'document', 'password' => 'foo'])
+        $this->post('/api/login', ['document' => 'document', 'password' => 'foo'])
             ->seeStatusCode(400)
             ->seeText("The doctype field is required");
     }
@@ -40,23 +40,23 @@ class UserControllerTest extends BrowserKitTestCase
     /**
      * @test
      *
-     * @POST /api/authenticate
+     * @POST('/api/login')
      * Authenticating without password throws error
      */
     public function given_missingpassword_when_authenticate_Then_Returns400() {
 
-        $this->post('/api/authenticate', ['document' => 'document', 'doctype' => 'P'])
+        $this->post('/api/login', ['document' => 'document', 'doctype' => 'P'])
             ->seeStatusCode(400)
             ->seeText("The password field is required");
     }
 
     /**
      * @test
-     * Test: POST /api/authenticate
+     * @POST('/api/login')
      * Authenticating with an invalid doctype, throws an Error
      */
     public function given_unsupportedDocType_When_authenticate_Then_Returns400() {
-        $this->post('/api/authenticate', ['document' => "foo", 'password' => 'foo', 'doctype' => 'A'])
+        $this->post('/api/login', ['document' => "foo", 'password' => 'foo', 'doctype' => 'A'])
             ->seeStatusCode(400)
             ->seeText("The selected doctype is invalid.");
     }
@@ -64,22 +64,22 @@ class UserControllerTest extends BrowserKitTestCase
 
     /**
      * @test
-     * @POST ('/api/authenticate')
+     * @POST ('/api/login')
      * Authenticating with non existing user throws an error
      */
     public function given_nonExistingUser_when_authenticate_Then_Returns401() {
-        $this->post('/api/authenticate', ['document' => "foo", 'password' => '5780', 'doctype' => 'P'])
+        $this->post('/api/login', ['document' => "foo", 'password' => '5780', 'doctype' => 'P'])
             ->seeStatusCode(401)
             ->seeText("Invalid credentials");
     }
 
     /**
      * @test
-     * @POST ('/api/authenticate')
+     * @POST ('/api/login')
      * Authenticating with an invalid password length, should throw an error
      */
     public function given_invalidPassword_when_authenticate_Then_Returns400() {
-        $this->post('/api/authenticate', ['document' => "foo", 'password' => 'foo', 'doctype' => 'P'])
+        $this->post('/api/login', ['document' => "foo", 'password' => 'foo', 'doctype' => 'P'])
             ->seeStatusCode(400)
             ->seeText("The password must be 4 characters.");
     }
@@ -87,7 +87,7 @@ class UserControllerTest extends BrowserKitTestCase
     /**
      * @test
      *
-     * Test: POST /api/authenticate.
+     * @POST('/api/login')
      * Authenticating with valid data should return authorization token.
      */
     public function given_existingUser_when_authenticate_Then_ReturnsToken()
@@ -98,7 +98,7 @@ class UserControllerTest extends BrowserKitTestCase
             'password' => bcrypt('1111')]
         );
 
-        $this->post('/api/authenticate', [
+        $this->post('/api/login', [
             'document' => '123456789',
             'password' => '1111',
             'doctype' => 'N'])
