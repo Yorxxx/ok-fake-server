@@ -28,7 +28,7 @@ class MessageClient {
     public $phoneValue;
     public $payload;
 
-    public function create(string $phone, array $payload) {
+    public function create($phone, $payload) {
         $this->createCalled = true;
         $this->phoneValue = $phone;
         $this->payload = $payload;
