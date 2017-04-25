@@ -50,12 +50,14 @@ class AddUser extends Command
         $name = $this->ask('Specify user name');
         $nif = $this->ask('Specify user NIF?');
         $password = $this->secret('Specify user password');
+        $phonenumber = $this->ask('Specify your phonenumber (format +AA-123456789)');
         if ($this->confirm('This will create a user with fake account, contacts and transactions. Proceed?')) {
             try {
                 $user = factory(User::class)->create([
-                    'name' => $name,
-                    'document' => $nif,
-                    'password' => bcrypt($password)
+                    'name'      => $name,
+                    'document'  => $nif,
+                    'password'  => bcrypt($password),
+                    'phone'     => $phonenumber
                 ]);
 
                 $this->line('Feeding data');

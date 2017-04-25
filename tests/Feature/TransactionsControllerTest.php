@@ -915,7 +915,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
         ]);
 
         // Act
-        $result = $this->post('/api/transactions/50/signature_confirmation', ['optSmsCode'=>'foo'], $this->headers($user));
+        $result = $this->post('/api/transactions/50/signature_confirmation', ['otpSmsCode'=>'foo'], $this->headers($user));
 
         // Assert
         $result->seeStatusCode(404)
@@ -937,7 +937,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
         ]);
 
         // Act
-        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_confirmation', ['optSmsCode'=>'foo'], $this->headers($current_user));
+        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_confirmation', ['otpSmsCode'=>'foo'], $this->headers($current_user));
 
         $result->seeStatusCode(403)
             ->seeText("User does not have permissions to access this transaction");
@@ -989,7 +989,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         // Act
         $result = $this->post('/api/transactions/' . $transaction->id . '/signature_confirmation', [
-            'optSmsCode'    => "var"
+            'otpSmsCode'    => "var"
         ], $this->headers($user));
 
         // Assert
@@ -1018,7 +1018,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         // Act
         $result = $this->post('/api/transactions/' . $transaction->id . '/signature_confirmation', [
-            'optSmsCode'    => "foo"
+            'otpSmsCode'    => "foo"
         ], $this->headers($user));
 
         // Assert

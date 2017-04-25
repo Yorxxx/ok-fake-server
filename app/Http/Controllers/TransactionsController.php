@@ -162,8 +162,6 @@ class TransactionsController extends AuthController
             $values['account_source'] = $emisor->id;
             $values['state'] = $agent_dest->account == NULL ? 7 : 0;
             if ($transaction = Transaction::create($values)) {
-                //$emisor->amount-=$request['amount'];
-                //$emisor->save();
                 return $this->response->item($transaction, $transformer);
             }
 
@@ -222,20 +220,11 @@ class TransactionsController extends AuthController
         if (strcmp($current_user->id, $transaction->user_id) != 0) {
             return $this->response->errorForbidden("User does not have permissions to access this transaction");
         }
-        /*$sid = 'ACa7d14424263a6813b8f58cbaa6ebd818';
-        $token = '9a6f42b147ea8f8641dcf0c0934ca0ec';
-        $client = new Client($sid, $token);*/
-
         $ticket = $this->generateRandomString();
         $transaction->ticket_otp = $ticket;
         $transaction->save();
 
         $this->smsProvider->send("Your verification code is " . $ticket, $current_user->phone);
-        /*$messages = $client->messages->create("+34646547055", array(
-                'From' => "+34988057321",
-                'Body' => "Your code is " . $ticket,
-            ));
-*/
         return ['ticket'    => $ticket];
     }
 
@@ -280,7 +269,7 @@ class TransactionsController extends AuthController
             $current_user = $this->getUserFromToken();
 
             $rules = [
-                'optSmsCode' => 'required'
+                'otpSmsCode' => 'required'
             ];
             $v = Validator::make($request->all(), $rules);
             if ($v->fails()) {
@@ -295,7 +284,7 @@ class TransactionsController extends AuthController
                 throw new UnauthorizedException("User does not have permissions to access this transaction");
             }
 
-            if (strcmp($request['optSmsCode'], $transaction->ticket_otp) != 0) {
+            if (strcmp($request['otpSmsCode'], $transaction->ticket_otp) != 0) {
                 throw new UnauthorizedException("The supplied code is incorrect");
             }
 

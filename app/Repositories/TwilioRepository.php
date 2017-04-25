@@ -29,10 +29,6 @@ class TwilioRepository implements SMSRepositoryInterface
      */
     public function send($message, $destination)
     {
-        /*$this->client->messages->create("+34646547055", array(
-            'From' => "+34988057321",
-            'Body' => $message,
-        ));*/
         $this->client->messages->create($destination, array(
             'From' => "+34988057321", // Twilio client phone number
             'Body' => $message,
