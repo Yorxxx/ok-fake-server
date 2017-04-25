@@ -170,6 +170,9 @@ return [
 
         Dingo\Api\Provider\LaravelServiceProvider::class,
 
+        \App\Providers\SMSServiceProvider::class,
+
+
         /*
          * Application Service Providers...
          */

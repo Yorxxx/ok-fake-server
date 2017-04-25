@@ -4,23 +4,36 @@ namespace App\Http\Controllers;
 
 use App\Account;
 use App\Agent;
+use App\Repositories\SMSRepositoryInterface;
 use App\Transaction;
+use App\TransactionOtp;
 use App\Transformers\TransactionsTranformer;
 use Carbon\Carbon;
 use Dingo\Api\Http\Request;
+use App\Http\Requests;
 use Dingo\Api\Routing\Helpers;
 use Exception;
-use Illuminate\Contracts\Queue\EntityNotFoundException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\UnauthorizedException;
-use Illuminate\Validation\ValidationException;
-use phpDocumentor\Reflection\Types\Integer;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Twilio\Rest\Client;
 
 
 class TransactionsController extends AuthController
 {
+    protected $smsProvider;
+
+    /**
+     * TransactionsController constructor.
+     */
+    public function __construct(SMSRepositoryInterface $smsProvider)
+    {
+        $this->smsProvider = $smsProvider;
+    }
+
+
     /**
      * Returns the transactions for the current user
      * TODO just for faking purposes, pending transactions created more than 24h ago are updated to confirmed. This should be faked in another way, like a cron job.
@@ -149,8 +162,6 @@ class TransactionsController extends AuthController
             $values['account_source'] = $emisor->id;
             $values['state'] = $agent_dest->account == NULL ? 7 : 0;
             if ($transaction = Transaction::create($values)) {
-                //$emisor->amount-=$request['amount'];
-                //$emisor->save();
                 return $this->response->item($transaction, $transformer);
             }
 
@@ -209,8 +220,12 @@ class TransactionsController extends AuthController
         if (strcmp($current_user->id, $transaction->user_id) != 0) {
             return $this->response->errorForbidden("User does not have permissions to access this transaction");
         }
+        $ticket = $this->generateRandomString();
+        $transaction->ticket_otp = $ticket;
+        $transaction->save();
 
-        return ['ticket'    => $this->generateRandomString()];
+        $this->smsProvider->send("Your verification code is " . $ticket, $current_user->phone);
+        return ['ticket'    => $ticket];
     }
 
     /**
@@ -229,8 +244,8 @@ class TransactionsController extends AuthController
      * @param int $length the desired length of string
      * @return string the random string
      */
-    function generateRandomString($length = 10) {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    function generateRandomString($length = 6) {
+        $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {
@@ -250,19 +265,44 @@ class TransactionsController extends AuthController
      */
     public function signatureConfirmation(Request $request, $id) {
 
-        $current_user = $this->getUserFromToken();
-        $transaction = Transaction::where('id', $id)->first();
-        if ($transaction == null) {
-            return $this->response->errorNotFound("Transaction does not exist");
-        }
-        if (strcmp($current_user->id, $transaction->user_id) != 0) {
-            return $this->response->errorForbidden("User does not have permissions to access this transaction");
-        }
-        $transaction->state = 5;
-        $transaction->source->amount -= $transaction->amount_source;
-        $transaction->save();
-        $transaction->source->save();
+        try {
+            $current_user = $this->getUserFromToken();
 
+            $rules = [
+                'otpSmsCode' => 'required'
+            ];
+            $v = Validator::make($request->all(), $rules);
+            if ($v->fails()) {
+                throw new BadRequestHttpException($v->getMessageBag()->first());
+            }
+
+            $transaction = Transaction::where('id', $id)->first();
+            if ($transaction == null) {
+                throw new NotFoundHttpException("Transaction does not exist");
+            }
+            if (strcmp($current_user->id, $transaction->user_id) != 0) {
+                throw new UnauthorizedException("User does not have permissions to access this transaction");
+            }
+
+            if (strcmp($request['otpSmsCode'], $transaction->ticket_otp) != 0) {
+                throw new UnauthorizedException("The supplied code is incorrect");
+            }
+
+            $transaction->state = 5;
+            $transaction->source->amount -= $transaction->amount_source;
+            $transaction->save();
+            $transaction->source->save();
+        } catch (BadRequestHttpException $e) {
+            return $this->response->errorBadRequest($e->getMessage());
+        } catch (NotFoundHttpException $e) {
+            return $this->response->errorNotFound($e->getMessage());
+        } catch (UnauthorizedException $e) {
+            return $this->response->errorForbidden($e->getMessage());
+        } catch( Exception $e) {
+            //@codeCoverageIgnoreStart
+            return $this->response->errorInternal($e->getMessage());
+            //@codeCoverageIgnoreEnd
+        }
         return;
     }
 }

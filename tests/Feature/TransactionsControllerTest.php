@@ -751,7 +751,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         $user = factory(\App\User::class)->create();
         $agent = factory(Agent::class)->create();
-        $transaction = factory(\App\Transaction::class)->create([
+        factory(\App\Transaction::class)->create([
            'user_id'                => $user->id,
             'agent_destination'     => $agent->id
         ]);
@@ -861,7 +861,9 @@ class TransactionsControllerTest extends BrowserKitTestCase
      */
     public function given_validTransaction_When_signatureOtp_Then_Returns202() {
 
-        $user = factory(\App\User::class)->create();
+        $user = factory(\App\User::class)->create([
+            'phone'     => '+34123456789'
+        ]);
         $agent = factory(Agent::class)->create();
         $transaction = factory(\App\Transaction::class)->create([
             'user_id'                => $user->id,
@@ -874,6 +876,16 @@ class TransactionsControllerTest extends BrowserKitTestCase
         // Assert
         $result->seeStatusCode(200)
             ->seeJsonStructure(['ticket']);
+
+        // Check a code has been saved for this transaction
+        $updated_transaction = \App\Transaction::where('id', $transaction->id)->first();
+        self::assertNotNull($updated_transaction);
+        self::assertNotNull($updated_transaction->ticket_otp);
+
+        // Assert SMS was sent
+        self::assertTrue($this->smsrepository->sendCalled);
+        self::assertNotNull($this->smsrepository->requestedMessage);
+        self::assertEquals($user->phone, $this->smsrepository->requestedDestination);
     }
 
     /**
@@ -895,9 +907,15 @@ class TransactionsControllerTest extends BrowserKitTestCase
     public function given_nonExistingTransaction_When_confirmOtpSMS_Then_Returns404() {
 
         $user = factory(\App\User::class)->create();
+        factory(\App\Transaction::class)->create([
+            'user_id'               => 10,
+            'agent_destination'     => 10,
+            'amount_source'         => 50,
+            'ticket_otp'            => "foo"
+        ]);
 
         // Act
-        $result = $this->post('/api/transactions/50/signature_confirmation', [], $this->headers($user));
+        $result = $this->post('/api/transactions/50/signature_confirmation', ['otpSmsCode'=>'foo'], $this->headers($user));
 
         // Assert
         $result->seeStatusCode(404)
@@ -919,10 +937,63 @@ class TransactionsControllerTest extends BrowserKitTestCase
         ]);
 
         // Act
-        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_confirmation', [], $this->headers($current_user));
+        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_confirmation', ['otpSmsCode'=>'foo'], $this->headers($current_user));
 
         $result->seeStatusCode(403)
             ->seeText("User does not have permissions to access this transaction");
+    }
+
+    /**
+     * @test
+     * If no code supplied, throw error
+     */
+    public function given_missingRequiredParam_When_confirmOTPSms_Then_Returns403() {
+        $user = factory(\App\User::class)->create();
+        $agent = factory(Agent::class)->create();
+        $account = factory(\App\Account::class)->create([
+            'user_id'   => $user->id,
+            'amount'    => 10000
+        ]);
+        $transaction = factory(\App\Transaction::class)->create([
+            'user_id'               => $user->id,
+            'agent_destination'     => $agent->id,
+            'amount_source'         => 50,
+            'ticket_otp'            => "foo"
+        ]);
+
+        // Act
+        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_confirmation', [], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(400);
+    }
+
+    /**
+     * @test
+     * If the supplied OTP code does not match, return 403
+     */
+    public function given_signatureOTPMismatch_When_confirmOTPSMS_Then_Returns403() {
+
+        $user = factory(\App\User::class)->create();
+        $agent = factory(Agent::class)->create();
+        $account = factory(\App\Account::class)->create([
+            'user_id'   => $user->id,
+            'amount'    => 10000
+        ]);
+        $transaction = factory(\App\Transaction::class)->create([
+            'user_id'               => $user->id,
+            'agent_destination'     => $agent->id,
+            'amount_source'         => 50,
+            'ticket_otp'            => "foo"
+        ]);
+
+        // Act
+        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_confirmation', [
+            'otpSmsCode'    => "var"
+        ], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(403);
     }
 
     /**
@@ -940,11 +1011,15 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $transaction = factory(\App\Transaction::class)->create([
             'user_id'               => $user->id,
             'agent_destination'     => $agent->id,
-            'amount_source'         => 50
+            'amount_source'         => 50,
+            'ticket_otp'            => "foo",
+            'account_source'        => $account->id
         ]);
 
         // Act
-        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_confirmation', [], $this->headers($user));
+        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_confirmation', [
+            'otpSmsCode'    => "foo"
+        ], $this->headers($user));
 
         // Assert
         $result->seeStatusCode(200);
@@ -1025,7 +1100,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
     public function given_sortedUniqueArray_When_unique_sort_array_Then_ReturnsSortedUniqueArray() {
         $array = [0, 1, 2, 3];
 
-        $controller = new \App\Http\Controllers\TransactionsController();
+        $controller = new \App\Http\Controllers\TransactionsController($this->smsrepository);
 
         // Act
         $result = $controller->unique_sort_array($array);
@@ -1050,7 +1125,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         $array = [50, 55, 55, 300];
 
-        $controller = new \App\Http\Controllers\TransactionsController();
+        $controller = new \App\Http\Controllers\TransactionsController($this->smsrepository);
 
         // Act
         $result = $controller->unique_sort_array($array);
@@ -1077,7 +1152,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         $array = [500, 55, 40, 3];
 
-        $controller = new \App\Http\Controllers\TransactionsController();
+        $controller = new \App\Http\Controllers\TransactionsController($this->smsrepository);
 
         // Act
         $result = $controller->unique_sort_array($array);
@@ -1104,7 +1179,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         $array = [500, 55, 4000, 500, 55, 3];
 
-        $controller = new \App\Http\Controllers\TransactionsController();
+        $controller = new \App\Http\Controllers\TransactionsController(new \Tests\Unit\Repositories\TwilioMockRepository());
 
         // Act
         $result = $controller->unique_sort_array($array);

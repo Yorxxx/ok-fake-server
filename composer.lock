@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "6227566644e7ecb6d577284ddac23128",
-    "content-hash": "08b150089f78722c4beecc624ebe8e60",
+    "hash": "46fecab755e2e606780e06ea61fc1672",
+    "content-hash": "dd4b8e94e82cb648994b100a8d2c3882",
     "packages": [
         {
             "name": "barryvdh/laravel-cors",
@@ -2863,6 +2863,52 @@
             "description": "CssToInlineStyles is a class that enables you to convert HTML-pages/files into HTML-pages/files with inline styles. This is very useful when you're sending emails.",
             "homepage": "https://github.com/tijsverkoyen/CssToInlineStyles",
             "time": "2016-09-20 12:50:39"
+        },
+        {
+            "name": "twilio/sdk",
+            "version": "5.7.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/twilio/twilio-php.git",
+                "reference": "67e16c2d9deaae5d1cebafc2d07c0e6215c92dfb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/twilio/twilio-php/zipball/67e16c2d9deaae5d1cebafc2d07c0e6215c92dfb",
+                "reference": "67e16c2d9deaae5d1cebafc2d07c0e6215c92dfb",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "apigen/apigen": "^4.1",
+                "phpunit/phpunit": "4.5.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Twilio\\": "Twilio/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Twilio API Team",
+                    "email": "api@twilio.com"
+                }
+            ],
+            "description": "A PHP wrapper for Twilio's API",
+            "homepage": "http://github.com/twilio/twilio-php",
+            "keywords": [
+                "api",
+                "sms",
+                "twilio"
+            ],
+            "time": "2017-04-12 17:49:25"
         },
         {
             "name": "tymon/jwt-auth",
