@@ -8,7 +8,7 @@ OK-Fake-Server
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
 </p>
 
-Dingo/Laravel server to provide data to ok-p2p clients. 
+Dingo/Laravel server to provide data to ok-p2p clients.
 The main purpose of this server is to provide fake data and not be in need to use client server.
 
 ----------
@@ -47,6 +47,7 @@ This package provides tools for the following, and more:
 
 - PHP 5.6+
 - Composer
+- PHP curl extension
 
 ## Installation
 
@@ -60,7 +61,7 @@ $ php artisan jwt:generate //Generate a key
 
 
 ## First launch
-There are a couple of steps to do before executing for the first time. 
+There are a couple of steps to do before executing for the first time.
 
 #### Define endpoint
 Define the endpoint of all the rest calls.
@@ -85,7 +86,7 @@ Since the application does not allow to add users or accounts, you should store 
 The first option is to run the database seeds provided with the project. This will add users, accounts, transactions and contacts.
 
 ```sh
-$ php artisan migrate 
+$ php artisan migrate
 ```
 Users would be created with a default password of 0000. You might need to check user's document value, though.
 
@@ -99,7 +100,7 @@ $ php artisan user:add
  Specify user NIF?:
  > 11223344A
  Specify user password:
- > 
+ >
 
  This will create a user with fake account, contacts and transactions. Proceed? (yes/no) [no]:
  > yes
@@ -154,11 +155,10 @@ This will execute every artisan command scheduled in the server.
 If you'd like to execute the command manually:
 ```sh
 $ php artisan transaction:update
-``` 
+```
 
 ## Execution
 Now that you have configured the server for the first time, it can be launched:
 ```sh
 $ php artisan serve
 ```
-

@@ -1,6 +1,8 @@
 <?php
 
 namespace Tests\Unit\Repositories;
+use App\Repositories\SMSRepositoryInterface;
+
 
 /**
  * Created by PhpStorm.
@@ -8,29 +10,17 @@ namespace Tests\Unit\Repositories;
  * Date: 25/04/17
  * Time: 11:46
  */
-class TwilioMockClient
+class TwilioMockRepository implements SMSRepositoryInterface
 {
-    public $messagesCalled = false;
-    public $messages;
+    public $sendCalled = false;
+    public $requestedMessage = null;
+    public $requestedDestination = null;
 
-    /**
-     * TwilioMockClient constructor.
-     */
-    public function __construct()
+    public function send($message, $destination)
     {
-        $this->messages = new MessageClient();
+        $this->sendCalled = true;
+        $this->requestedMessage = $message;
+        $this->requestedDestination = $destination;
     }
-}
 
-class MessageClient {
-
-    public $createCalled = false;
-    public $phoneValue;
-    public $payload;
-
-    public function create(string $phone, array $payload) {
-        $this->createCalled = true;
-        $this->phoneValue = $phone;
-        $this->payload = $payload;
-    }
 }

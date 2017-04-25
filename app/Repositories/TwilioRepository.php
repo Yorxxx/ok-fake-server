@@ -6,11 +6,7 @@
  * Time: 10:34
  */
 
-namespace App;
-
-use Illuminate\Support\ServiceProvider;
-use SMSRepositoryInterface;
-use Twilio\Rest\Client;
+namespace App\Repositories;
 
 class TwilioRepository implements SMSRepositoryInterface
 {
@@ -33,8 +29,12 @@ class TwilioRepository implements SMSRepositoryInterface
      */
     public function send($message, $destination)
     {
-        $this->client->messages->create("+34646547055", array(
+        /*$this->client->messages->create("+34646547055", array(
             'From' => "+34988057321",
+            'Body' => $message,
+        ));*/
+        $this->client->messages->create($destination, array(
+            'From' => "+34988057321", // Twilio client phone number
             'Body' => $message,
         ));
     }

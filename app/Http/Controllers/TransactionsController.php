@@ -4,23 +4,34 @@ namespace App\Http\Controllers;
 
 use App\Account;
 use App\Agent;
+use App\Repositories\SMSRepositoryInterface;
 use App\Transaction;
 use App\Transformers\TransactionsTranformer;
 use Carbon\Carbon;
 use Dingo\Api\Http\Request;
+use App\Http\Requests;
 use Dingo\Api\Routing\Helpers;
 use Exception;
-use Illuminate\Contracts\Queue\EntityNotFoundException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\UnauthorizedException;
-use Illuminate\Validation\ValidationException;
-use phpDocumentor\Reflection\Types\Integer;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Twilio\Rest\Client;
 
 
 class TransactionsController extends AuthController
 {
+    protected $smsProvider;
+
+    /**
+     * TransactionsController constructor.
+     */
+    public function __construct(SMSRepositoryInterface $smsProvider)
+    {
+        $this->smsProvider = $smsProvider;
+    }
+
+
     /**
      * Returns the transactions for the current user
      * TODO just for faking purposes, pending transactions created more than 24h ago are updated to confirmed. This should be faked in another way, like a cron job.
@@ -209,8 +220,19 @@ class TransactionsController extends AuthController
         if (strcmp($current_user->id, $transaction->user_id) != 0) {
             return $this->response->errorForbidden("User does not have permissions to access this transaction");
         }
+        /*$sid = 'ACa7d14424263a6813b8f58cbaa6ebd818';
+        $token = '9a6f42b147ea8f8641dcf0c0934ca0ec';
+        $client = new Client($sid, $token);*/
 
-        return ['ticket'    => $this->generateRandomString()];
+        $ticket = $this->generateRandomString();
+
+        $this->smsProvider->send("Your verification code is " . $ticket, $current_user->phone);
+        /*$messages = $client->messages->create("+34646547055", array(
+                'From' => "+34988057321",
+                'Body' => "Your code is " . $ticket,
+            ));
+*/
+        return ['ticket'    => $ticket];
     }
 
     /**
@@ -229,8 +251,8 @@ class TransactionsController extends AuthController
      * @param int $length the desired length of string
      * @return string the random string
      */
-    function generateRandomString($length = 10) {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    function generateRandomString($length = 6) {
+        $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {

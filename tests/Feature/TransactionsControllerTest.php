@@ -751,7 +751,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         $user = factory(\App\User::class)->create();
         $agent = factory(Agent::class)->create();
-        $transaction = factory(\App\Transaction::class)->create([
+        factory(\App\Transaction::class)->create([
            'user_id'                => $user->id,
             'agent_destination'     => $agent->id
         ]);
@@ -861,7 +861,9 @@ class TransactionsControllerTest extends BrowserKitTestCase
      */
     public function given_validTransaction_When_signatureOtp_Then_Returns202() {
 
-        $user = factory(\App\User::class)->create();
+        $user = factory(\App\User::class)->create([
+            'phone'     => '+34123456789'
+        ]);
         $agent = factory(Agent::class)->create();
         $transaction = factory(\App\Transaction::class)->create([
             'user_id'                => $user->id,
@@ -874,6 +876,9 @@ class TransactionsControllerTest extends BrowserKitTestCase
         // Assert
         $result->seeStatusCode(200)
             ->seeJsonStructure(['ticket']);
+        self::assertTrue($this->smsrepository->sendCalled);
+        self::assertNotNull($this->smsrepository->requestedMessage);
+        self::assertEquals($user->phone, $this->smsrepository->requestedDestination);
     }
 
     /**
