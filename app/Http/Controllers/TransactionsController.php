@@ -6,6 +6,7 @@ use App\Account;
 use App\Agent;
 use App\Repositories\SMSRepositoryInterface;
 use App\Transaction;
+use App\TransactionOtp;
 use App\Transformers\TransactionsTranformer;
 use Carbon\Carbon;
 use Dingo\Api\Http\Request;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\UnauthorizedException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Twilio\Rest\Client;
 
 
@@ -225,6 +227,8 @@ class TransactionsController extends AuthController
         $client = new Client($sid, $token);*/
 
         $ticket = $this->generateRandomString();
+        $transaction->ticket_otp = $ticket;
+        $transaction->save();
 
         $this->smsProvider->send("Your verification code is " . $ticket, $current_user->phone);
         /*$messages = $client->messages->create("+34646547055", array(
@@ -272,19 +276,44 @@ class TransactionsController extends AuthController
      */
     public function signatureConfirmation(Request $request, $id) {
 
-        $current_user = $this->getUserFromToken();
-        $transaction = Transaction::where('id', $id)->first();
-        if ($transaction == null) {
-            return $this->response->errorNotFound("Transaction does not exist");
-        }
-        if (strcmp($current_user->id, $transaction->user_id) != 0) {
-            return $this->response->errorForbidden("User does not have permissions to access this transaction");
-        }
-        $transaction->state = 5;
-        $transaction->source->amount -= $transaction->amount_source;
-        $transaction->save();
-        $transaction->source->save();
+        try {
+            $current_user = $this->getUserFromToken();
 
+            $rules = [
+                'optSmsCode' => 'required'
+            ];
+            $v = Validator::make($request->all(), $rules);
+            if ($v->fails()) {
+                throw new BadRequestHttpException($v->getMessageBag()->first());
+            }
+
+            $transaction = Transaction::where('id', $id)->first();
+            if ($transaction == null) {
+                throw new NotFoundHttpException("Transaction does not exist");
+            }
+            if (strcmp($current_user->id, $transaction->user_id) != 0) {
+                throw new UnauthorizedException("User does not have permissions to access this transaction");
+            }
+
+            if (strcmp($request['optSmsCode'], $transaction->ticket_otp) != 0) {
+                throw new UnauthorizedException("The supplied code is incorrect");
+            }
+
+            $transaction->state = 5;
+            $transaction->source->amount -= $transaction->amount_source;
+            $transaction->save();
+            $transaction->source->save();
+        } catch (BadRequestHttpException $e) {
+            return $this->response->errorBadRequest($e->getMessage());
+        } catch (NotFoundHttpException $e) {
+            return $this->response->errorNotFound($e->getMessage());
+        } catch (UnauthorizedException $e) {
+            return $this->response->errorForbidden($e->getMessage());
+        } catch( Exception $e) {
+            //@codeCoverageIgnoreStart
+            return $this->response->errorInternal($e->getMessage());
+            //@codeCoverageIgnoreEnd
+        }
         return;
     }
 }
