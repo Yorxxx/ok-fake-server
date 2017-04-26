@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Repositories\NexmoRepository;
+use App\Repositories\SMSPubliRepository;
 use App\Repositories\SMSRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
 use Nexmo;
@@ -35,7 +36,8 @@ class SMSServiceProvider extends ServiceProvider
             //$token = '9a6f42b147ea8f8641dcf0c0934ca0ec';
             //$client = new Client($sid, $token);
             $client = new Nexmo\Client(new Nexmo\Client\Credentials\Basic($key, $secret));
-            return new NexmoRepository($client);
+            //return new NexmoRepository($client);
+            return new SMSPubliRepository();
         });
     }
 }
