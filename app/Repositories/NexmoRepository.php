@@ -31,8 +31,8 @@ class NexmoRepository implements SMSRepositoryInterface
     public function send($message, $destination)
     {
         $this->client->message()->send([
-            'to' => $destination,
-            'from' => "foo",
+            'to' => preg_replace("/[^0-9+]/", "", $destination ),
+            'from' => env('SMS_EMISOR_NAME', 'Opencash'),
             'text' => $message
         ]);
     }

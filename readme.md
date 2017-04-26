@@ -76,6 +76,9 @@ API_PREFIX='api'
 JWT_TTL=5256000
 TWILIO_SID=<your Twilio SID>
 TWILIO_TOKEN=<your Twilio token>
+SMS_EMISOR_NAME=<the name you want as SMS emisor>
+SMS_API_KEY=<API key for sending SMS>
+SMS_API_SECRET=<Secret API Key for sending SMS>
 ```
 
 This values reference to the database used, the endpoint of the REST services, and the expiration date of the token (set to 10 years, currently JWTAuth does not support permanent token within the stable version)

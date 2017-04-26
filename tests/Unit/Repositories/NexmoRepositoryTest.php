@@ -19,11 +19,12 @@ class NexmoRepositoryTest extends BrowserKitTestCase
         $repository = new NexmoRepository($client);
 
         // Act
-        $repository->send("foo message", "foodestination");
+        $repository->send("foo message", "+34-123456789");
 
         // Assert
         self::assertNotNull($client->message->sendCalled);
         self::assertEquals($client->message->payload['text'], "foo message");
-        self::assertEquals($client->message->payload['to'], "foodestination");
+        self::assertEquals($client->message->payload['to'], "34123456789");
+        self::assertEquals($client->message->payload['from'], env('SMS_EMISOR_NAME', 'Opencash'));
     }
 }
