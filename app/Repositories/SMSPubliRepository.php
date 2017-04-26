@@ -41,9 +41,10 @@ class SMSPubliRepository implements SMSRepositoryInterface
 
         $from = env('SMS_EMISOR_NAME', 'Opencash');
         $to = preg_replace("/[^0-9+]/", "", $destination );
+        $key = env('SMS_API_KEY');
 
         $request = '{
-            "api_key":"b6487747573305f72ece1095875b4a56",
+            "api_key":'. '"' . $key . '",
             "messages":[
                 {
                     "from": ' . '"' . $from . '",
