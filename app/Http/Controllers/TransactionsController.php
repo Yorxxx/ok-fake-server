@@ -6,24 +6,22 @@ use App\Account;
 use App\Agent;
 use App\Repositories\SMSRepositoryInterface;
 use App\Transaction;
-use App\TransactionOtp;
 use App\Transformers\TransactionsTranformer;
 use Carbon\Carbon;
 use Dingo\Api\Http\Request;
-use App\Http\Requests;
-use Dingo\Api\Routing\Helpers;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\UnauthorizedException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Twilio\Rest\Client;
 
 
 class TransactionsController extends AuthController
 {
     protected $smsProvider;
+
+
 
     /**
      * TransactionsController constructor.
