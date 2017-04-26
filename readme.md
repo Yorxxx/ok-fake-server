@@ -54,7 +54,7 @@ This package provides tools for the following, and more:
 First install dependencies via composer.
 ```sh
 $ composer install //Install dependencies
-$ php artisan vendor:publish --provider="Dingo\Api\Provider\LaravelServiceProvider" //Add Dingo provider
+$ php artisan vendor:publish --provider="Dingo\Api\Provider\LaravelServiceProvider"
 $ php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\JWTAuthServiceProvider" //Add JWTAuth for authentication
 $ php artisan jwt:generate //Generate a key
 ```
@@ -63,12 +63,24 @@ $ php artisan jwt:generate //Generate a key
 ## First launch
 There are a couple of steps to do before executing for the first time.
 
-#### Define endpoint
-Define the endpoint of all the rest calls.
+#### Define environment variables
+The server requires a couple of environment variables to launch. This values should be located on a file called ".env".
+
 ```sh
-$ echo "API_PREFIX='api'" > .env
+$ touch .env
 ```
-There are more environment variables . See [Dingo Configuration](https://github.com/dingo/api/wiki/Configuration) for more info.
+Copy the following values in this file
+```
+DB_CONNECTION=sqlite
+API_PREFIX='api'
+JWT_TTL=5256000
+TWILIO_SID=<your Twilio SID>
+TWILIO_TOKEN=<your Twilio token>
+```
+
+This values reference to the database used, the endpoint of the REST services, and the expiration date of the token (set to 10 years, currently JWTAuth does not support permanent token within the stable version)
+
+There are more environment variables. See [Dingo Configuration](https://github.com/dingo/api/wiki/Configuration) for more info.
 
 
 #### Create database
