@@ -64,7 +64,7 @@ $ php artisan jwt:generate //Generate a key
 There are a couple of steps to do before executing for the first time.
 
 #### Define environment variables
-The server requires a couple of environment variables to launch. This values should be located on a file called ".env".
+The server requires a couple of environment variables to launch. This values should be located on a file called *.env*.
 
 ```sh
 $ touch .env
@@ -74,14 +74,14 @@ Copy the following values in this file
 DB_CONNECTION=sqlite
 API_PREFIX='api'
 JWT_TTL=5256000
-TWILIO_SID=<your Twilio SID>
-TWILIO_TOKEN=<your Twilio token>
 SMS_EMISOR_NAME=<the name you want as SMS emisor>
 SMS_API_KEY=<API key for sending SMS>
 SMS_API_SECRET=<Secret API Key for sending SMS>
+SMS_PROVIDER=<SMS provider>
 ```
 
 This values reference to the database used, the endpoint of the REST services, and the expiration date of the token (set to 10 years, currently JWTAuth does not support permanent token within the stable version)
+For information about SMS keys, refer to [SMS Provider](#sms_provider)
 
 There are more environment variables. See [Dingo Configuration](https://github.com/dingo/api/wiki/Configuration) for more info.
 
@@ -171,6 +171,20 @@ If you'd like to execute the command manually:
 ```sh
 $ php artisan transaction:update
 ```
+#### SMS Provider
+The server uses an external SMS provider in order to send confirmation code transactions to users. Currently, the server supports the following providers:
+
+* [Twilio](https://www.twilio.com/)
+* [Nexmo](https://www.nexmo.com/products/sms)
+* [SMSPubli](http://smspubli.com/)
+
+You can define your desired provider by specifying the value *SMS_PROVIDER* within your environment variables. The supported values are:
+* TWILIO
+* NEXMO
+* SMSPUBLI
+
+You will also need to define your *SMS_API_KEY*, and in, some providers, your *SMS_API_SECRET*.
+The last value you need to define is *SMS_EMISOR_NAME*. If your selected provider supports it, you can specify the name of the sender of the SMS. Refer to the external documentation of your provider for more info.
 
 ## Execution
 Now that you have configured the server for the first time, it can be launched:
