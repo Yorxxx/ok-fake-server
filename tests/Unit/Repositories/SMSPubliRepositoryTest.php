@@ -26,7 +26,7 @@ class SMSPubliRepositoryTest extends BrowserKitTestCase
         $json_a = json_decode($string = trim(preg_replace('/\s+/', ' ', $result)));
         self::assertNotNull($json_a->api_key);
         self::assertNotNull($json_a->messages);
-        self::assertEquals(env('SMS_EMISOR_NAME', null), $json_a->messages[0]->from);
+        self::assertEquals(env('SMS_EMISOR_NAME', "Opencash"), $json_a->messages[0]->from);
         self::assertEquals("+34123456789", $json_a->messages[0]->to);
         self::assertEquals("foo", $json_a->messages[0]->text);
     }
