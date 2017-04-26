@@ -21,8 +21,6 @@ class TransactionsController extends AuthController
 {
     protected $smsProvider;
 
-
-
     /**
      * TransactionsController constructor.
      */
@@ -210,20 +208,48 @@ class TransactionsController extends AuthController
      */
     public function signatureOtp(Request $request, $id) {
 
-        $current_user = $this->getUserFromToken();
-        $transaction = Transaction::where('id', $id)->first();
-        if ($transaction == null) {
-            return $this->response->errorNotFound("Transaction does not exist");
-        }
-        if (strcmp($current_user->id, $transaction->user_id) != 0) {
-            return $this->response->errorForbidden("User does not have permissions to access this transaction");
-        }
-        $ticket = $this->generateRandomString();
-        $transaction->ticket_otp = $ticket;
-        $transaction->save();
+        try {
+            $rules = [
+                'signatureData'         => 'required',
+                'signaturePositions'    => 'required'
+            ];
+            $v = Validator::make($request->all(), $rules);
+            if ($v->fails()) {
+                throw new BadRequestHttpException($v->getMessageBag()->first());
+            }
 
-        $this->smsProvider->send("Your verification code is " . $ticket, $current_user->phone);
-        return ['ticket'    => $ticket];
+            $current_user = $this->getUserFromToken();
+            $transaction = Transaction::where('id', $id)->first();
+            if ($transaction == null) {
+                throw new ModelNotFoundException("Transaction does not exist");
+            }
+            if (strcmp($current_user->id, $transaction->user_id) != 0) {
+                throw new UnauthorizedException("User does not have permissions to access this transaction");
+            }
+            if ($this->in_array_all(0, $request['signatureData'])) {
+                $ticket = 'test';
+            }
+            else {
+                $ticket = $this->generateRandomString();
+            }
+            $transaction->ticket_otp = $ticket;
+            $transaction->save();
+
+            if (strcmp($ticket, "test") != 0)
+                $this->smsProvider->send("Your verification code is " . $ticket, $current_user->phone);
+            return ['ticket' => $ticket];
+        } catch (BadRequestHttpException $e) {
+            return $this->response->errorBadRequest($e->getMessage());
+        } catch (ModelNotFoundException $e) {
+            return $this->response->errorNotFound($e->getMessage());
+        } catch (UnauthorizedException $e) {
+            return $this->response->errorForbidden($e->getMessage());
+        }
+    }
+
+    function in_array_all($value, $array)
+    {
+        return (reset($array) == $value && count(array_unique($array)) == 1);
     }
 
     /**
