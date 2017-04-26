@@ -1179,7 +1179,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         $array = [500, 55, 4000, 500, 55, 3];
 
-        $controller = new \App\Http\Controllers\TransactionsController(new \Tests\Unit\Repositories\TwilioMockRepository());
+        $controller = new \App\Http\Controllers\TransactionsController(new \Tests\Unit\Repositories\SMSMockRepository());
 
         // Act
         $result = $controller->unique_sort_array($array);

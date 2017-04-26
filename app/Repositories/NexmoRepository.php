@@ -36,6 +36,4 @@ class NexmoRepository implements SMSRepositoryInterface
             'text' => $message
         ]);
     }
-
-
 }

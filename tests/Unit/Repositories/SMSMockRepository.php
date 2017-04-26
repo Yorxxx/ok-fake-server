@@ -5,12 +5,13 @@ use App\Repositories\SMSRepositoryInterface;
 
 
 /**
+ * A mock implementation of SMSRepositoryInterface for testing
  * Created by PhpStorm.
  * User: jorge
  * Date: 25/04/17
  * Time: 11:46
  */
-class TwilioMockRepository implements SMSRepositoryInterface
+class SMSMockRepository implements SMSRepositoryInterface
 {
     public $sendCalled = false;
     public $requestedMessage = null;

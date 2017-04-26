@@ -3,14 +3,10 @@
 namespace Tests;
 
 use App\Repositories\SMSRepositoryInterface;
-use App\Repositories\TwilioRepository;
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-
 use Illuminate\Contracts\Console\Kernel;
 use Laravel\BrowserKitTesting\TestCase;
 use JWTAuth;
-use Tests\Unit\Repositories\TwilioMockClient;
-use Tests\Unit\Repositories\TwilioMockRepository;
+use Tests\Unit\Repositories\SMSMockRepository;
 
 abstract class BrowserKitTestCase extends TestCase
 {
@@ -40,7 +36,7 @@ abstract class BrowserKitTestCase extends TestCase
 
         // Override our app provider
         $app->singleton(SMSRepositoryInterface::class, function ($app) {
-            $this->smsrepository = new TwilioMockRepository();
+            $this->smsrepository = new SMSMockRepository();
             return $this->smsrepository;
         });
 
