@@ -38,9 +38,8 @@ class SMSServiceProvider extends ServiceProvider
                 $provider = config('SMS_PROVIDER');
             }
 
-
-            $key = env('SMS_API_KEY', null);
-            $secret = env('SMS_API_SECRET', null);
+            $key = env('SMS_API_KEY', "foo");
+            $secret = env('SMS_API_SECRET', "foosecret");
             if (strcmp($provider, 'NEXMO') == 0) {
                 $client = new Nexmo\Client(new Nexmo\Client\Credentials\Basic($key, $secret));
                 return new NexmoRepository($client);
