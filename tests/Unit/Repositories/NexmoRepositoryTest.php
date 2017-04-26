@@ -6,7 +6,7 @@ use App\Repositories\NexmoRepository;
 use Tests\BrowserKitTestCase;
 use Tests\Unit\Repositories\NexmoMockClient;
 
-class TwilioRepositoryTest extends BrowserKitTestCase
+class NexmoRepositoryTest extends BrowserKitTestCase
 {
 
     /**

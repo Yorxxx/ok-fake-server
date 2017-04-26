@@ -18,11 +18,11 @@ class TwilioMockClient
      */
     public function __construct()
     {
-        $this->messages = new MessageClient();
+        $this->messages = new TwilioMessageClient();
     }
 }
 
-class MessageClient {
+class TwilioMessageClient {
 
     public $createCalled = false;
     public $phoneValue;

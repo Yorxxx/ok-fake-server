@@ -12,7 +12,7 @@ class NexmoMockClient
      */
     public function __construct()
     {
-        $this->message = new MessageClient();
+        $this->message = new NexmoMessageClient();
     }
 
     public function message() {
@@ -20,7 +20,7 @@ class NexmoMockClient
     }
 }
 
-class MessageClient {
+class NexmoMessageClient {
 
     public $sendCalled = false;
     public $payload;
