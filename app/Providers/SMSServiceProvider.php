@@ -26,7 +26,7 @@ class SMSServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        /* codeIgnoreStart */
+
         // Provide our SMSRepositoryInterface
         $this->app->singleton(SMSRepositoryInterface::class, function ($app) {
             $key = env('SMS_API_KEY', null);
@@ -37,6 +37,5 @@ class SMSServiceProvider extends ServiceProvider
             $client = new Nexmo\Client(new Nexmo\Client\Credentials\Basic($key, $secret));
             return new NexmoRepository($client);
         });
-        /* codeIgnoreEnd */
     }
 }

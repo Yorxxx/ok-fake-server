@@ -2,11 +2,9 @@
 
 namespace Tests;
 
-use App\Repositories\SMSRepositoryInterface;
 use Illuminate\Contracts\Console\Kernel;
 use Laravel\BrowserKitTesting\TestCase;
 use JWTAuth;
-use Tests\Unit\Repositories\SMSMockRepository;
 
 abstract class BrowserKitTestCase extends TestCase
 {
@@ -16,9 +14,6 @@ abstract class BrowserKitTestCase extends TestCase
      * @var string
      */
     public $baseUrl = 'http://localhost';
-
-    
-    public $smsrepository = null;
 
     /**
      * Creates the application.
@@ -33,12 +28,6 @@ abstract class BrowserKitTestCase extends TestCase
         $app = require __DIR__.'/../bootstrap/app.php';
 
         $app->make(Kernel::class)->bootstrap();
-
-        // Override our app provider
-        $app->singleton(SMSRepositoryInterface::class, function ($app) {
-            $this->smsrepository = new SMSMockRepository();
-            return $this->smsrepository;
-        });
 
         return $app;
     }

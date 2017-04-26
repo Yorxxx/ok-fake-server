@@ -1,13 +1,37 @@
 <?php
 
+use App\Repositories\SMSRepositoryInterface;
 use Carbon\Carbon;
 use Tests\BrowserKitTestCase;
 use App\Agent;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\Unit\Repositories\SMSMockRepository;
 
 class TransactionsControllerTest extends BrowserKitTestCase
 {
     use DatabaseMigrations;
+
+    public $smsrepository;
+
+    protected function setUp()
+    {
+        parent::setUp();
+        $this->smsrepository = new SMSMockRepository();
+    }
+
+
+    public function createApplication()
+    {
+        $app = parent::createApplication();
+
+        // Override our app provider
+        $app->singleton(SMSRepositoryInterface::class, function ($app) {
+            return $this->smsrepository;
+        });
+
+        return $app;
+    }
+
 
     /**
      * @test
@@ -1179,7 +1203,7 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
         $array = [500, 55, 4000, 500, 55, 3];
 
-        $controller = new \App\Http\Controllers\TransactionsController(new \Tests\Unit\Repositories\SMSMockRepository());
+        $controller = new \App\Http\Controllers\TransactionsController($this->smsrepository);
 
         // Act
         $result = $controller->unique_sort_array($array);
