@@ -851,7 +851,10 @@ class TransactionsControllerTest extends BrowserKitTestCase
         $user = factory(\App\User::class)->create();
 
         // Act
-        $result = $this->post('/api/transactions/50/signature_otp', [], $this->headers($user));
+        $result = $this->post('/api/transactions/50/signature_otp', [
+            'signatureData'         => [1, 2, 3],
+            'signaturePositions'    => [1, 2, 3]
+        ], $this->headers($user));
 
         // Assert
         $result->seeStatusCode(404)
@@ -873,10 +876,59 @@ class TransactionsControllerTest extends BrowserKitTestCase
         ]);
 
         // Act
-        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_otp', [], $this->headers($current_user));
+        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_otp', [
+            'signatureData'         => [1, 2, 3],
+            'signaturePositions'    => [1, 2, 3]
+        ], $this->headers($current_user));
 
         $result->seeStatusCode(403)
             ->seeText("User does not have permissions to access this transaction");
+    }
+
+    /**
+     * @test
+     * If no signatureData specified, return bad request
+     */
+    public function given_missingSignatureData_When_signatureOtp_Then_ReturnsBadRequest() {
+        $user = factory(\App\User::class)->create([
+            'phone'     => '+34123456789'
+        ]);
+        $agent = factory(Agent::class)->create();
+        $transaction = factory(\App\Transaction::class)->create([
+            'user_id'                => $user->id,
+            'agent_destination'     => $agent->id
+        ]);
+
+        // Act
+        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_otp', [
+            'signaturePositions'    => [1, 2, 3]
+        ], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(400);
+    }
+
+    /**
+     * @test
+     * If no signaturePositions specified, return bad request
+     */
+    public function given_missingSignaturePositions_When_signatureOtp_Then_ReturnsBadRequest() {
+        $user = factory(\App\User::class)->create([
+            'phone'     => '+34123456789'
+        ]);
+        $agent = factory(Agent::class)->create();
+        $transaction = factory(\App\Transaction::class)->create([
+            'user_id'                => $user->id,
+            'agent_destination'     => $agent->id
+        ]);
+
+        // Act
+        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_otp', [
+            'signatureData'    => [1, 2, 3]
+        ], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(400);
     }
 
     /**
@@ -895,7 +947,10 @@ class TransactionsControllerTest extends BrowserKitTestCase
         ]);
 
         // Act
-        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_otp', [], $this->headers($user));
+        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_otp', [
+            'signatureData'         => [1, 2, 3],
+            'signaturePositions'    => [1, 2, 3]
+        ], $this->headers($user));
 
         // Assert
         $result->seeStatusCode(200)
@@ -910,6 +965,40 @@ class TransactionsControllerTest extends BrowserKitTestCase
         self::assertTrue($this->smsrepository->sendCalled);
         self::assertNotNull($this->smsrepository->requestedMessage);
         self::assertEquals($user->phone, $this->smsrepository->requestedDestination);
+    }
+
+    /**
+     * @test
+     * If receives all zeroes on the payload, then skips sending an SMS
+     */
+    public function given_allZeroesOnPayload_When_signatureOtp_Then_SkipsSMSSending() {
+
+        $user = factory(\App\User::class)->create([
+            'phone'     => '+34123456789'
+        ]);
+        $agent = factory(Agent::class)->create();
+        $transaction = factory(\App\Transaction::class)->create([
+            'user_id'                => $user->id,
+            'agent_destination'     => $agent->id
+        ]);
+
+        // Act
+        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_otp', [
+            'signatureData'         => [0, 0, 0],
+            'signaturePositions'    => [1, 2, 3]
+        ], $this->headers($user));
+
+        // Assert
+        $result->seeStatusCode(200)
+            ->seeJsonStructure(['ticket']);
+
+        // Check a code has been saved for this transaction
+        $updated_transaction = \App\Transaction::where('id', $transaction->id)->first();
+        self::assertNotNull($updated_transaction);
+        self::assertNotNull($updated_transaction->ticket_otp);
+
+        // Assert SMS was sent
+        self::assertFalse($this->smsrepository->sendCalled);
     }
 
     /**
