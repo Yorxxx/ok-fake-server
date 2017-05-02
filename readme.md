@@ -191,3 +191,8 @@ Now that you have configured the server for the first time, it can be launched:
 ```sh
 $ php artisan serve
 ```
+This command will launch on localhost on port 8000. If you would like to launch in an specific host, you should run
+```sh
+$ php artisan serve --host=188.226.223.252 --port=4563
+```
+This command will launch the server within specified host at port 4563. You can, of course, specify your desired values.
