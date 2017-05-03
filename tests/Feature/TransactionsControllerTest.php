@@ -969,40 +969,6 @@ class TransactionsControllerTest extends BrowserKitTestCase
 
     /**
      * @test
-     * If receives all zeroes on the payload, then skips sending an SMS
-     */
-    public function given_allZeroesOnPayload_When_signatureOtp_Then_SkipsSMSSending() {
-
-        $user = factory(\App\User::class)->create([
-            'phone'     => '+34123456789'
-        ]);
-        $agent = factory(Agent::class)->create();
-        $transaction = factory(\App\Transaction::class)->create([
-            'user_id'                => $user->id,
-            'agent_destination'     => $agent->id
-        ]);
-
-        // Act
-        $result = $this->post('/api/transactions/' . $transaction->id . '/signature_otp', [
-            'signatureData'         => [0, 0, 0],
-            'signaturePositions'    => [1, 2, 3]
-        ], $this->headers($user));
-
-        // Assert
-        $result->seeStatusCode(200)
-            ->seeJsonStructure(['ticket']);
-
-        // Check a code has been saved for this transaction
-        $updated_transaction = \App\Transaction::where('id', $transaction->id)->first();
-        self::assertNotNull($updated_transaction);
-        self::assertNotNull($updated_transaction->ticket_otp);
-
-        // Assert SMS was sent
-        self::assertFalse($this->smsrepository->sendCalled);
-    }
-
-    /**
-     * @test
      * Cannot confirm SMS if user is not authorized
      */
     public function given_noAuthorization_When_confirmOtpSMS_Then_Returns401() {
