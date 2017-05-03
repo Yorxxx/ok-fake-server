@@ -226,17 +226,12 @@ class TransactionsController extends AuthController
             if (strcmp($current_user->id, $transaction->user_id) != 0) {
                 throw new UnauthorizedException("User does not have permissions to access this transaction");
             }
-            if ($this->in_array_all(0, $request['signatureData'])) {
-                $ticket = 'test';
-            }
-            else {
-                $ticket = $this->generateRandomString();
-            }
+
+            $ticket = $this->generateRandomString();
             $transaction->ticket_otp = $ticket;
             $transaction->save();
 
-            if (strcmp($ticket, "test") != 0)
-                $this->smsProvider->send("Your verification code is " . $ticket, $current_user->phone);
+            $this->smsProvider->send("Your verification code is " . $ticket, $current_user->phone);
             return ['ticket' => $ticket];
         } catch (BadRequestHttpException $e) {
             return $this->response->errorBadRequest($e->getMessage());
@@ -308,7 +303,7 @@ class TransactionsController extends AuthController
                 throw new UnauthorizedException("User does not have permissions to access this transaction");
             }
 
-            if (strcmp($request['otpSmsCode'], $transaction->ticket_otp) != 0) {
+            if (env('SMS_PROVIDER') != null && strcmp($request['otpSmsCode'], $transaction->ticket_otp) != 0) {
                 throw new UnauthorizedException("The supplied code is incorrect");
             }
 
